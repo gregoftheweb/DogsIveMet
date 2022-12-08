@@ -5,6 +5,7 @@ const HomeScreen = () => {
   return (
     <View>
       <Text>HomeScreen hello world</Text>
+      <Text>Cool story bro!</Text>
     </View>
   );
 };
