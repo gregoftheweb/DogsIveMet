@@ -7,7 +7,7 @@ const HomeScreen = () => {
   const {height} = useWindowDimensions();
 
   const onNewDogPressed = data => {
-    console.warn('Create new Dog Record');
+    console.log('Create new Dog Record');
     //navigation.navigate('SignIn');
   };
 
@@ -26,6 +26,7 @@ const HomeScreen = () => {
         onPress={onNewDogPressed}
         fgColor="white"
         type="PRIMARY"
+        testID="buttonNewDog"
       />
     </View>
   );
