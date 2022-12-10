@@ -11,7 +11,6 @@ it('renders correctly', () => {
 describe('CustomButton', () => {
   test('render button with text', () => {
     const component = renderer.create(<CustomButton />);
-
     // Expect the result
     expect(component.toJSON()).toMatchSnapshot();
   });

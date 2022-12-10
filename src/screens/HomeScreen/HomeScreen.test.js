@@ -11,16 +11,35 @@ it('renders correctly', () => {
 
 //check onpress events
 describe('HomeScreen', () => {
-  test('check button press', () => {
+  test('check New Dog button press', () => {
     const component = renderer.create(<HomeScreen />);
     console.log = jest.fn();
     // Find the button that has props.testID === 'button'
     const button = component.root.findByProps({testID: 'buttonNewDog'});
     // All codes that causes state updates should wrap in act(...)
-
     button.props.onPress();
-
     // Expect the result
     expect(console.log).toHaveBeenCalledWith('Create new Dog Record');
+  });
+  test('check Dog List button press', () => {
+    const component = renderer.create(<HomeScreen />);
+    console.log = jest.fn();
+    const button = component.root.findByProps({testID: 'buttonDogList'});
+    button.props.onPress();
+    expect(console.log).toHaveBeenCalledWith('Go to Dog List');
+  });
+  test('check My Dog button press', () => {
+    const component = renderer.create(<HomeScreen />);
+    console.log = jest.fn();
+    const button = component.root.findByProps({testID: 'buttonMyDog'});
+    button.props.onPress();
+    expect(console.log).toHaveBeenCalledWith('Go to My Dog');
+  });
+  test('check Me and mine button press', () => {
+    const component = renderer.create(<HomeScreen />);
+    console.log = jest.fn();
+    const button = component.root.findByProps({testID: 'buttonMe'});
+    button.props.onPress();
+    expect(console.log).toHaveBeenCalledWith('Go to Me');
   });
 });
