@@ -88,8 +88,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   title: {
-    color: '#52082b',
-    fontSize: 30,
+    color: '#004055',
+    fontSize: 36,
     fontWeight: 'bold',
     alignSelf: 'center',
   },
