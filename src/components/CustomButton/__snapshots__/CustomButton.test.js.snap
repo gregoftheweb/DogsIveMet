@@ -24,7 +24,7 @@ exports[`CustomButton render button with text 1`] = `
         "width": "80%",
       },
       Object {
-        "width": 600,
+        "width": "80%",
       },
       Object {
         "backgroundColor": "#00749c",
@@ -38,7 +38,7 @@ exports[`CustomButton render button with text 1`] = `
     style={
       Array [
         Object {
-          "color": "white",
+          "color": "#00749c",
           "fontWeight": "600",
         },
         Object {

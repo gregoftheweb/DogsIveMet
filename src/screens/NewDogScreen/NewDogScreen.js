@@ -7,8 +7,6 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import React, {useState} from 'react';
-
-import Logo from '../../../assets/images/DIM-Logo-60.png';
 import CameraIcon from '../../../assets/images/cameraIcon_80.png';
 import vanillaDog from '../../../assets/images/vanillaDog.png';
 import CustomInput from '../../components/CustomInput';
@@ -16,10 +14,14 @@ import CustomButton from '../../components/CustomButton';
 import {useNavigation} from '@react-navigation/native';
 import {useForm, Controller} from 'react-hook-form';
 import DatePicker from 'react-native-date-picker';
+import NewDogHeader from '../../components/NewDogHeader';
+
 
 const NewDogScreen = () => {
   const {width} = useWindowDimensions();
   const [date, setDate] = useState(new Date());
+
+  const navigation = useNavigation();
 
   const {
     control,
@@ -36,22 +38,11 @@ const NewDogScreen = () => {
     console.log('canceled the create new dog screen');
     navigation.navigate('Home');
   };
-  const navigation = useNavigation();
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
-      <View style={styles.container}>
-        <View style={styles.topRowItem2}>
-          <Image
-            source={Logo}
-            style={[styles.logo, {width: width * 0.25}]}
-            resizeMode="contain"
-          />
-        </View>
-        <View style={styles.topRowItem1}>
-          <Text style={styles.title}>New Dog</Text>
-        </View>
-      </View>
+
+      <NewDogHeader />     
 
       <View style={styles.container}>
         <View
@@ -62,7 +53,7 @@ const NewDogScreen = () => {
           ]}>
           <Image source={vanillaDog} resizeMode="contain" />
         </View>
-        <View style={styles.topRowItem2}>
+        <View style={styles.rowItem2}>
           <Image
             source={CameraIcon}
             style={[styles.camera, {width: width * 0.25}]}
@@ -108,7 +99,7 @@ const NewDogScreen = () => {
       </View>
 
       <View style={styles.bottomContainer}>
-        <View style={styles.topRowItem1}>
+        <View style={styles.rowItem1}>
           <CustomButton
             text="Save New Dog"
             onPress={onNewDogSaved}
@@ -118,7 +109,7 @@ const NewDogScreen = () => {
             testID="buttonNewDog"
           />
         </View>
-        <View style={styles.topRowItem2}>
+        <View style={styles.rowItem2}>
           <CustomButton
             text="Cancel"
             onPress={onCancel}
@@ -173,11 +164,11 @@ const styles = StyleSheet.create({
     marginRight: 10,
     marginLeft: 10,
   },
-  topRowItem1: {
+  rowItem1: {
     width: '70%',
     alignItems: 'center',
   },
-  topRowItem2: {
+  rowItem2: {
     width: '30%',
     marginTop: '2%',
   },
@@ -191,17 +182,11 @@ const styles = StyleSheet.create({
     margin: 10,
     marginTop: 15,
   },
-  logo: {
-    maxWidth: 200,
-  },
+
   camera: {
     maxWidth: 200,
   },
-  title: {
-    color: '#031440',
-    fontSize: 30,
-    fontWeight: 'bold',
-  },
+
   datePicker: {
     height: 80,
     alignSelf: 'center',
