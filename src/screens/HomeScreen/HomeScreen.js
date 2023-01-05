@@ -23,7 +23,7 @@ const HomeScreen = () => {
   };
   const onDogListPressed = data => {
     console.log('Go to Dog List');
-    //navigation.navigate('SignIn');
+    navigation.navigate('JustDatePicker');
   };
   const onMyDogPressed = data => {
     console.log('Go to My Dog');
