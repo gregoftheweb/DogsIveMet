@@ -86,7 +86,7 @@ const NewDogScreen = () => {
       </View>
 
       <View style={styles.container}>
-        <DatePicker />
+        <DatePicker dateSet="hey" />
       </View>
 
       <View style={styles.bottomContainer}>

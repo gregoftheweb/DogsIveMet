@@ -27,15 +27,27 @@ const DatePicker = () => {
   };
 
   return (
-    <View>
-      <Text>DatePicker - as compontent</Text>
+    <View style={styles.container}>
+      <Text style={styles.textBox}>
+        Date I met the dog: {date.toLocaleString()}
+      </Text>
 
-      <Button onPress={showDatepicker} title="Show date picker!" />
-      <Button onPress={showTimepicker} title="Show time picker!" />
-      <Text>selected: {date.toLocaleString()}</Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-evenly',
+          width: '100%',
+        }}>
+        <View style={styles.buttonStyle}>
+          <Button onPress={showDatepicker} title="Change Date" />
+        </View>
+        <View style={styles.buttonStyle}>
+          <Button onPress={showTimepicker} title="Change Time" />
+        </View>
+      </View>
       {show && (
         <DateTimePicker
-          testID="dateTimePicker"
+          style={styles.textBox}
           value={date}
           mode={mode}
           is24Hour={true}
@@ -48,4 +60,23 @@ const DatePicker = () => {
 
 export default DatePicker;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fbf9fc',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+  },
+  textBox: {
+    backgroundColor: 'white',
+    borderColor: '#004055',
+    width: '100%',
+    borderWidth: 2,
+    borderRadius: 5,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    marginVertical: 5,
+    color: '#000000',
+    fontWeight: '600',
+  },
+});
