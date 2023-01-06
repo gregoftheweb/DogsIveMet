@@ -31,7 +31,9 @@ const CustomInput = ({
             />
           </View>
           {error && (
-            <Text style={{color: 'red', alignSelf: 'stretch'}}>{error.message|| 'error'}</Text>
+            <Text style={{color: 'red', alignSelf: 'stretch'}}>
+              {error.message || 'error'}
+            </Text>
           )}
         </>
       )}

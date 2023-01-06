@@ -18,8 +18,8 @@ import DatePicker from '../../components/DatePicker';
 
 const NewDogScreen = () => {
   const {width} = useWindowDimensions();
-
   const navigation = useNavigation();
+  const datePickerDate = Date();
 
   const {
     control,
@@ -29,6 +29,8 @@ const NewDogScreen = () => {
 
   const onNewDogSaved = data => {
     console.log('Saved a new Dog Record');
+    console.log(`dogName: ${data.dogName}`);
+    console.log(`date: ${datePickerDate}`);
     navigation.navigate('Home');
   };
 
@@ -86,14 +88,14 @@ const NewDogScreen = () => {
       </View>
 
       <View style={styles.container}>
-        <DatePicker dateSet="hey" />
+        <DatePicker name="whenMet" control={control} />
       </View>
 
       <View style={styles.bottomContainer}>
         <View style={styles.rowItem1}>
           <CustomButton
             text="Save New Dog"
-            onPress={onNewDogSaved}
+            onPress={handleSubmit(onNewDogSaved)}
             fgColor="white"
             bgColor="#aa3278"
             type="PRIMARY"
@@ -107,6 +109,9 @@ const NewDogScreen = () => {
             type="TERTIARY"
             testID="buttonCancelNewDog"
           />
+        </View>
+        <View>
+          <Text>output: dog name -</Text>
         </View>
       </View>
     </ScrollView>

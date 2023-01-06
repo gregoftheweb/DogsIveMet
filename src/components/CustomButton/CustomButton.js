@@ -15,7 +15,6 @@ const CustomButton = ({onPress, text, type = 'PRIMARY', bgColor, fgColor}) => {
       onPress={onPress}
       style={[
         styles.container,
-        {width: width * 0.8},
         styles[`container_${type}`],
         bgColor ? {backgroundColor: bgColor} : {},
       ]}>
@@ -53,6 +52,10 @@ const styles = StyleSheet.create({
   text: {
     fontWeight: '600',
     color: 'white',
+  },
+  container_SMALL: {
+    padding: 5,
+    marginVertical: 2,
   },
   text_PRIMARY: {
     color: '#52082b',
