@@ -34,6 +34,11 @@ const NewDogScreen = () => {
     navigation.navigate('Home');
   };
 
+  let setDatePickerDate = data => {
+    console.log(data.currentDate);
+    console.lot('in set date in new dog screen');
+  };
+
   const onCancel = data => {
     console.log('canceled the create new dog screen');
     navigation.navigate('Home');
@@ -88,7 +93,13 @@ const NewDogScreen = () => {
       </View>
 
       <View style={styles.container}>
-        <DatePicker name="whenMet" control={control} />
+        <DatePicker
+          name="whenMet"
+          control={control}
+          someText="hello world"
+          changeDate={this.setDatePickerDate}
+          newDate={this.datePickerDate}
+        />
       </View>
 
       <View style={styles.bottomContainer}>
@@ -109,9 +120,6 @@ const NewDogScreen = () => {
             type="TERTIARY"
             testID="buttonCancelNewDog"
           />
-        </View>
-        <View>
-          <Text>output: dog name -</Text>
         </View>
       </View>
     </ScrollView>

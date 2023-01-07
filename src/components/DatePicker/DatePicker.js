@@ -2,7 +2,7 @@ import {StyleSheet, Text, View, Button, Platform} from 'react-native';
 import React, {useState} from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-const DatePicker = () => {
+const DatePicker = (props) => {
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
@@ -11,6 +11,9 @@ const DatePicker = () => {
     const currentDate = selectedDate;
     setShow(false);
     setDate(currentDate);
+    console.log(currentDate);
+    props.newDate = currentDate;
+    props.changeDate(currentDate);
   };
 
   const showMode = currentMode => {
@@ -30,6 +33,7 @@ const DatePicker = () => {
     <View style={styles.container}>
       <Text style={styles.textBox}>
         Date I met the dog: {date.toLocaleString()}
+        -- {props.someText}
       </Text>
 
       <View
