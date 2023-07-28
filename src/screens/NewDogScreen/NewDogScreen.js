@@ -31,6 +31,7 @@ const NewDogScreen = () => {
     console.log('Saved a new Dog Record');
     console.log(`dogName: ${data.dogName}`);
     console.log(`date: ${datePickerDate}`);
+    console.log(`date from picker: ${whenMet.newDate}`);
     navigation.navigate('Home');
   };
 

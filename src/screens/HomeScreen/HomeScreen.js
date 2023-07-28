@@ -17,10 +17,10 @@ const HomeScreen = () => {
   const {height} = useWindowDimensions();
   const navigation = useNavigation();
 
-  const onNewDogPressed = data => {
+  function onNewDogPressed(data) {
     console.log('Create new Dog Record');
     navigation.navigate('NewDog');
-  };
+  }
   const onDogListPressed = data => {
     console.log('Go to Dog List');
     navigation.navigate('JustDatePicker');
