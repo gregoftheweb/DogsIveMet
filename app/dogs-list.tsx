@@ -41,7 +41,7 @@ export default function DogsListScreen() {
   }, []);
 
   // Load dogs function
-  const loadDogs = async () => {
+  const loadDogs = useCallback(async () => {
     logEvent('DogsList:load:start');
     try {
       const dogs = await getDogs();
@@ -57,18 +57,18 @@ export default function DogsListScreen() {
         context: 'DogsList:load:error',
       });
     }
-  };
+  }, []);
 
   // Load on mount
   useEffect(() => {
     loadDogs();
-  }, []);
+  }, [loadDogs]);
 
   // Reload on focus
   useFocusEffect(
     useCallback(() => {
       loadDogs();
-    }, [])
+    }, [loadDogs])
   );
 
   // Filter and sort dogs whenever dependencies change
@@ -247,7 +247,7 @@ export default function DogsListScreen() {
             placeholder="Search by name"
             value={searchQuery}
             onChangeText={handleSearchChange}
-            autoCapitalize="none"
+            autoCapitalize="words"
           />
           {searchQuery.length > 0 && (
             <Pressable onPress={() => setSearchQuery('')} style={styles.clearButton}>
