@@ -30,9 +30,11 @@ export function Toast({
 }: ToastProps) {
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(50)).current;
+  const [isShowing, setIsShowing] = useState(false);
 
   useEffect(() => {
     if (visible) {
+      setIsShowing(true);
       // Show animation
       Animated.parallel([
         Animated.timing(opacity, {
@@ -71,13 +73,14 @@ export function Toast({
         useNativeDriver: true,
       }),
     ]).start(() => {
+      setIsShowing(false);
       if (onHide) {
         onHide();
       }
     });
   };
 
-  if (!visible && opacity._value === 0) {
+  if (!isShowing) {
     return null;
   }
 

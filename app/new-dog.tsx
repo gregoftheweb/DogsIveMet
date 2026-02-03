@@ -33,6 +33,12 @@ const BREEDS = [
   'Mixed',
 ];
 
+// Delay before navigation to allow toast to be visible
+const TOAST_NAVIGATION_DELAY_MS = 500;
+
+// Error message constants
+const SAVE_ERROR_MESSAGE = 'Failed to save dog. Please try again.';
+
 export default function NewDogScreen() {
   const router = useRouter();
   const [name, setName] = useState('');
@@ -155,15 +161,15 @@ export default function NewDogScreen() {
           pathname: '/dog-profile',
           params: { id: newDog.id },
         });
-      }, 500);
+      }, TOAST_NAVIGATION_DELAY_MS);
     } catch (error) {
       logError(error instanceof Error ? error : new Error(String(error)), {
         context: 'New Dog - Save failed',
         dogName: trimmedName,
         breed,
       });
-      showToast('Failed to save dog. Please try again.', 'error');
-      Alert.alert('Error', 'Failed to save dog. Please try again.');
+      // Show toast for immediate feedback; alert provides fallback if toast is missed
+      showToast(SAVE_ERROR_MESSAGE, 'error');
     } finally {
       setIsSaving(false);
     }
