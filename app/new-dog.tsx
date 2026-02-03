@@ -11,12 +11,15 @@ import {
   KeyboardAvoidingView,
   Platform,
   Modal,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { Dog } from '@/src/types/Dog';
 import { addDog } from '@/src/storage/dogs';
+import { logEvent, logError } from '@/src/utils/logger';
+import { Toast } from '@/components/Toast';
 
 const BREEDS = [
   'Unknown',
@@ -38,6 +41,16 @@ export default function NewDogScreen() {
   const [metLocationText, setMetLocationText] = useState('');
   const [notes, setNotes] = useState('');
   const [breedModalVisible, setBreedModalVisible] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('info');
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setToastMessage(message);
+    setToastType(type);
+    setToastVisible(true);
+  };
 
   const handleTakePhoto = async () => {
     try {
@@ -70,16 +83,23 @@ export default function NewDogScreen() {
   };
 
   const handleSave = async () => {
+    logEvent('New Dog - Save initiated', { name: name.trim(), breed });
+
     // Validate required fields
     const trimmedName = name.trim();
     if (!trimmedName) {
+      logEvent('New Dog - Validation failed', { reason: 'Name is empty' });
       Alert.alert('Validation Error', 'Please enter the dog\'s name.');
       return;
     }
     if (!breed) {
+      logEvent('New Dog - Validation failed', { reason: 'Breed not selected' });
       Alert.alert('Validation Error', 'Please select a breed.');
       return;
     }
+
+    setIsSaving(true);
+    logEvent('New Dog - Saving started');
 
     try {
       // Generate ID using crypto.randomUUID() if available, otherwise fallback to Date.now() + random
@@ -102,21 +122,38 @@ export default function NewDogScreen() {
         updatedAt: now,
       };
 
+      logEvent('New Dog - Dog object created', { id, name: trimmedName, breed });
+
       // Save to storage
       await addDog(newDog);
+      logEvent('New Dog - Saved to storage successfully', { id });
 
-      // Navigate to dog profile
-      router.push({
-        pathname: '/dog-profile',
-        params: { id: newDog.id },
-      });
+      // Show success feedback
+      showToast('Dog saved successfully!', 'success');
+
+      // Navigate to dog profile after a brief delay to show the toast
+      setTimeout(() => {
+        logEvent('New Dog - Navigating to dog profile', { id });
+        router.push({
+          pathname: '/dog-profile',
+          params: { id: newDog.id },
+        });
+      }, 500);
     } catch (error) {
-      console.error('Error saving dog:', error);
+      logError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'New Dog - Save failed',
+        dogName: trimmedName,
+        breed,
+      });
+      showToast('Failed to save dog. Please try again.', 'error');
       Alert.alert('Error', 'Failed to save dog. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleCancel = () => {
+    logEvent('New Dog - Cancelled');
     router.back();
   };
 
@@ -213,10 +250,19 @@ export default function NewDogScreen() {
             style={({ pressed }) => [
               styles.saveButton,
               pressed && styles.saveButtonPressed,
+              isSaving && styles.saveButtonDisabled,
             ]}
             onPress={handleSave}
+            disabled={isSaving}
           >
-            <Text style={styles.saveButtonText}>Save Dog</Text>
+            {isSaving ? (
+              <View style={styles.savingContainer}>
+                <ActivityIndicator color="#fff" size="small" />
+                <Text style={styles.saveButtonText}>Saving...</Text>
+              </View>
+            ) : (
+              <Text style={styles.saveButtonText}>Save Dog</Text>
+            )}
           </Pressable>
 
           <Pressable
@@ -277,6 +323,14 @@ export default function NewDogScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Toast Notification */}
+      <Toast
+        message={toastMessage}
+        visible={toastVisible}
+        type={toastType}
+        onHide={() => setToastVisible(false)}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -392,6 +446,15 @@ const styles = StyleSheet.create({
   saveButtonPressed: {
     backgroundColor: '#0051D5',
     transform: [{ scale: 0.98 }],
+  },
+  saveButtonDisabled: {
+    backgroundColor: '#99c5ff',
+    opacity: 0.7,
+  },
+  savingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   saveButtonText: {
     color: '#fff',
