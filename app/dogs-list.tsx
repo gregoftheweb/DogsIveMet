@@ -230,7 +230,12 @@ export default function DogsListScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
+        <Pressable 
+          onPress={() => router.back()} 
+          style={styles.backButton}
+          accessibilityLabel="Go back"
+          accessibilityRole="button"
+        >
           <Ionicons name="arrow-back" size={24} color="#007AFF" />
         </Pressable>
         <Text style={styles.headerTitle}>Dogs I've Met</Text>
@@ -248,6 +253,8 @@ export default function DogsListScreen() {
             value={searchQuery}
             onChangeText={handleSearchChange}
             autoCapitalize="words"
+            accessibilityLabel="Search dogs by name"
+            accessibilityHint="Enter a dog's name to filter the list"
           />
           {searchQuery.length > 0 && (
             <Pressable onPress={() => setSearchQuery('')} style={styles.clearButton}>
@@ -337,7 +344,11 @@ export default function DogsListScreen() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Filter by Breed</Text>
-              <Pressable onPress={() => setBreedModalVisible(false)}>
+              <Pressable 
+                onPress={() => setBreedModalVisible(false)}
+                accessibilityLabel="Close breed filter"
+                accessibilityRole="button"
+              >
                 <Ionicons name="close" size={28} color="#333" />
               </Pressable>
             </View>
