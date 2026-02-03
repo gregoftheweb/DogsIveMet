@@ -23,15 +23,15 @@ const HomeScreen = () => {
   };
   const onDogListPressed = data => {
     console.log('Go to Dog List');
-    //navigation.navigate('SignIn');
+    navigation.navigate('DogsList');
   };
   const onMyDogPressed = data => {
     console.log('Go to My Dog');
-    //navigation.navigate('SignIn');
+    navigation.navigate('MyDog');
   };
   const onMePressed = data => {
     console.log('Go to Me');
-    //navigation.navigate('me');
+    navigation.navigate('Me');
   };
 
   return (
@@ -52,7 +52,7 @@ const HomeScreen = () => {
           testID="buttonNewDog"
         />
         <CustomButton
-          text="Dog List"
+          text="List of dogs"
           onPress={onDogListPressed}
           fgColor="white"
           type="PRIMARY"
@@ -72,6 +72,10 @@ const HomeScreen = () => {
           type="PRIMARY"
           testID="buttonMe"
         />
+        {/* Advertising banner placeholder */}
+        <View style={styles.adBanner}>
+          <Text style={styles.adText}>Advertising</Text>
+        </View>
       </View>
     </ScrollView>
   );
@@ -92,6 +96,21 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontWeight: 'bold',
     alignSelf: 'center',
+  },
+  adBanner: {
+    width: '100%',
+    height: 60,
+    backgroundColor: '#e0e0e0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#cccccc',
+  },
+  adText: {
+    color: '#666666',
+    fontSize: 14,
+    fontStyle: 'italic',
   },
 });
 
