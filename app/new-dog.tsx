@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -52,12 +52,22 @@ export default function NewDogScreen() {
     setToastVisible(true);
   };
 
+  // Log screen mount
+  useEffect(() => {
+    logEvent('New Dog - Screen mounted');
+    return () => {
+      logEvent('New Dog - Screen unmounted');
+    };
+  }, []);
+
   const handleTakePhoto = async () => {
+    logEvent('New Dog - Take photo initiated');
     try {
       // Request camera permissions
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       
       if (status !== 'granted') {
+        logEvent('New Dog - Camera permission denied');
         Alert.alert(
           'Camera Permission Required',
           'Please enable camera permissions in your device settings to take photos of dogs.',
@@ -66,6 +76,8 @@ export default function NewDogScreen() {
         return;
       }
 
+      logEvent('New Dog - Camera permission granted, launching camera');
+      
       // Launch camera
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
@@ -75,9 +87,14 @@ export default function NewDogScreen() {
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         setPhotoUri(result.assets[0].uri);
+        logEvent('New Dog - Photo captured successfully');
+      } else {
+        logEvent('New Dog - Photo capture cancelled');
       }
     } catch (error) {
-      console.error('Error taking photo:', error);
+      logError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'New Dog - Photo capture failed',
+      });
       Alert.alert('Error', 'Failed to take photo. Please try again.');
     }
   };
