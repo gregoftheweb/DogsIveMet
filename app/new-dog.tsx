@@ -82,15 +82,24 @@ export default function NewDogScreen() {
     }
 
     try {
+      // Generate ID using crypto.randomUUID() if available, otherwise fallback to Date.now()
+      const id = typeof crypto !== 'undefined' && crypto.randomUUID 
+        ? crypto.randomUUID() 
+        : Date.now().toString();
+      
+      const now = new Date().toISOString();
+      
       // Create dog object
       const newDog: Dog = {
-        id: Date.now().toString(),
+        id,
         name: trimmedName,
         breed,
         photoUri: photoUri || undefined,
         metLocationText: metLocationText.trim() || undefined,
         notes: notes.trim() || undefined,
-        metAt: new Date().toISOString(),
+        metAt: now,
+        createdAt: now,
+        updatedAt: now,
       };
 
       // Save to storage

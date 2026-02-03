@@ -6,4 +6,6 @@ export interface Dog {
   metLocationText?: string;
   notes?: string;
   metAt: string; // ISO datetime string
+  createdAt: string; // ISO datetime string
+  updatedAt: string; // ISO datetime string
 }
