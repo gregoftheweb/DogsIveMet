@@ -126,7 +126,7 @@ export default function NewDogScreen() {
           <Text style={styles.label}>Name *</Text>
           <TextInput
             style={styles.input}
-            placeholder="Name"
+            placeholder="Enter the dog's name"
             value={name}
             onChangeText={setName}
             autoCapitalize="words"
