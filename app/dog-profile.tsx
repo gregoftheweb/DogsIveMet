@@ -1,13 +1,18 @@
 import React from 'react';
 import { StyleSheet, View, Text, Pressable } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 
 export default function DogProfileScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const { id } = params;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Dog Profile Screen</Text>
+      <Text style={styles.title}>Dog Profile</Text>
+      {id && (
+        <Text style={styles.idText}>ID: {id}</Text>
+      )}
 
       <Pressable
         style={({ pressed }) => [
@@ -33,8 +38,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 40,
+    marginBottom: 16,
     color: '#333',
+  },
+  idText: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 40,
   },
   button: {
     backgroundColor: '#007AFF',
