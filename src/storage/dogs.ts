@@ -69,7 +69,11 @@ export async function updateDog(updated: Dog): Promise<void> {
       throw new Error(`Dog with id ${updated.id} not found`);
     }
     
-    dogs[index] = updated;
+    // Automatically update the updatedAt timestamp
+    dogs[index] = {
+      ...updated,
+      updatedAt: new Date().toISOString(),
+    };
     await AsyncStorage.setItem(DOGS_STORAGE_KEY, JSON.stringify(dogs));
   } catch (error) {
     console.error('Error updating dog:', error);

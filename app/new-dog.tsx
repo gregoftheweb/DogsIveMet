@@ -82,10 +82,10 @@ export default function NewDogScreen() {
     }
 
     try {
-      // Generate ID using crypto.randomUUID() if available, otherwise fallback to Date.now()
+      // Generate ID using crypto.randomUUID() if available, otherwise fallback to Date.now() + random
       const id = typeof crypto !== 'undefined' && crypto.randomUUID 
         ? crypto.randomUUID() 
-        : Date.now().toString();
+        : `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       
       const now = new Date().toISOString();
       
