@@ -1,76 +1,117 @@
 /**
  * TopNav - Persistent top navigation component
- * Shows three compact buttons: New Dog (green), List of Dogs, My Dog(s)
- * Replaces back arrow navigation with direct navigation to key screens
+ * Shows four navigation destinations: Home, New Dog, List of Dogs, My Dog(s)
+ * Features active-state awareness and replaces back arrow navigation
  */
 
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, useTheme, Surface } from 'react-native-paper';
+import { Button, useTheme, Surface, IconButton, SegmentedButtons } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, usePathname } from 'expo-router';
 import { useDogCounts } from '../state/DogCountsProvider';
 import { logEvent } from '../utils/logger';
 
 export function TopNav() {
   const router = useRouter();
+  const pathname = usePathname();
   const theme = useTheme();
   const { myDogsCount } = useDogCounts();
 
   // Smart pluralization for My Dog(s) button
   const myDogsLabel = myDogsCount === 1 ? 'My Dog' : 'My Dogs';
 
+  // Map pathname to active screen
+  const getActiveScreen = (): string => {
+    if (pathname === '/') return 'home';
+    if (pathname === '/new-dog') return 'new';
+    if (pathname === '/dogs-list') return 'list';
+    if (pathname === '/my-dogs-list') return 'myDogs';
+    return '';
+  };
+
+  const activeScreen = getActiveScreen();
+
+  const handleHome = () => {
+    logEvent('Nav:top:home');
+    router.replace('/');
+  };
+
   const handleNewDog = () => {
     logEvent('Nav:top:new_dog');
-    router.push('/new-dog');
+    router.replace('/new-dog');
   };
 
-  const handleList = () => {
-    logEvent('Nav:top:list');
-    router.push('/dogs-list');
-  };
-
-  const handleMyDogs = () => {
-    logEvent('Nav:top:my_dogs');
-    router.push('/my-dogs-list');
+  const handleListOrMyDogs = (value: string) => {
+    if (value === 'list') {
+      logEvent('Nav:top:list');
+      router.replace('/dogs-list');
+    } else if (value === 'myDogs') {
+      logEvent('Nav:top:my_dogs');
+      router.replace('/my-dogs-list');
+    }
   };
 
   return (
     <SafeAreaView edges={['top']} style={{ backgroundColor: theme.colors.surface }}>
-      <Surface style={[styles.container, { backgroundColor: theme.colors.surface }]} elevation={1}>
+      <Surface 
+        style={[
+          styles.container, 
+          { 
+            backgroundColor: theme.colors.surface,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.dark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)',
+          }
+        ]} 
+        elevation={1}
+      >
         <View style={styles.buttonsRow}>
+          {/* Home Button */}
+          <IconButton
+            icon="home"
+            size={24}
+            mode={activeScreen === 'home' ? 'contained' : 'contained-tonal'}
+            onPress={handleHome}
+            style={styles.homeButton}
+          />
+
+          {/* New Dog Button */}
           <Button
             mode="contained"
             onPress={handleNewDog}
-            style={[styles.button, styles.newDogButton, { backgroundColor: '#4CAF50' }]}
+            style={[
+              styles.newDogButton, 
+              { backgroundColor: activeScreen === 'new' ? '#388E3C' : '#4CAF50' }
+            ]}
             contentStyle={styles.buttonContent}
             labelStyle={styles.buttonLabel}
+            accessibilityLabel="New Dog"
             compact
           >
-            New Dog
+            New
           </Button>
 
-          <Button
-            mode="contained-tonal"
-            onPress={handleList}
-            style={styles.button}
-            contentStyle={styles.buttonContent}
-            labelStyle={styles.buttonLabel}
-            compact
-          >
-            List of Dogs
-          </Button>
-
-          <Button
-            mode="contained-tonal"
-            onPress={handleMyDogs}
-            style={styles.button}
-            contentStyle={styles.buttonContent}
-            labelStyle={styles.buttonLabel}
-            compact
-          >
-            {myDogsLabel}
-          </Button>
+          {/* List / My Dogs Segmented Buttons */}
+          <View style={styles.segmentedContainer}>
+            <SegmentedButtons
+              value={activeScreen === 'list' ? 'list' : activeScreen === 'myDogs' ? 'myDogs' : ''}
+              onValueChange={handleListOrMyDogs}
+              density="small"
+              style={styles.segmentedButtons}
+              buttons={[
+                {
+                  value: 'list',
+                  label: 'All Dogs',
+                  style: styles.segmentButton,
+                },
+                {
+                  value: 'myDogs',
+                  label: myDogsLabel,
+                  style: styles.segmentButton,
+                },
+              ]}
+            />
+          </View>
         </View>
       </Surface>
     </SafeAreaView>
@@ -80,29 +121,36 @@ export function TopNav() {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
+    paddingVertical: 6,
   },
   buttonsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
     gap: 8,
+    minHeight: 44,
   },
-  button: {
-    flex: 1,
-    borderRadius: 8,
-    minHeight: 36,
+  homeButton: {
+    margin: 0,
   },
   newDogButton: {
-    // Green background is set inline to override theme
+    borderRadius: 8,
+    minHeight: 40,
   },
   buttonContent: {
-    height: 36,
-    paddingHorizontal: 4,
+    height: 40,
+    paddingHorizontal: 12,
   },
   buttonLabel: {
-    fontSize: 12,
+    fontSize: 13,
     lineHeight: 16,
+    fontWeight: '600',
+  },
+  segmentedContainer: {
+    flex: 1,
+  },
+  segmentedButtons: {
+  },
+  segmentButton: {
+    minHeight: 40,
   },
 });
