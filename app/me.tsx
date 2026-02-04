@@ -1,59 +1,44 @@
 import React from 'react';
-import { StyleSheet, View, Text, Pressable } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Button, Text, useTheme } from 'react-native-paper';
+import { ScreenContainer } from '@/src/ui/ScreenContainer';
 
 export default function MeScreen() {
   const router = useRouter();
+  const theme = useTheme();
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Me Screen</Text>
+    <ScreenContainer>
+      <View style={styles.container}>
+        <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.onBackground }]}>
+          Me Screen
+        </Text>
 
-      <Pressable
-        style={({ pressed }) => [
-          styles.button,
-          pressed && styles.buttonPressed,
-        ]}
-        onPress={() => router.back()}
-      >
-        <Text style={styles.buttonText}>Back to Home</Text>
-      </Pressable>
-    </View>
+        <Button
+          mode="contained"
+          onPress={() => router.back()}
+          style={styles.button}
+        >
+          Back to Home
+        </Button>
+      </View>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
   },
   title: {
-    fontSize: 28,
+    marginBottom: 32,
     fontWeight: 'bold',
-    marginBottom: 40,
-    color: '#333',
   },
   button: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 14,
-    paddingHorizontal: 28,
     borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  buttonPressed: {
-    backgroundColor: '#0051D5',
-    transform: [{ scale: 0.98 }],
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
   },
 });
