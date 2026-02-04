@@ -1,156 +1,168 @@
-/**
- * TopNav - Persistent top navigation component
- * Shows four navigation destinations: Home, New Dog, List of Dogs, My Dog(s)
- * Features active-state awareness and replaces back arrow navigation
- */
+import type { Href } from "expo-router";
+import { router, usePathname } from "expo-router";
+import React, { useMemo } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { Button, MD3Theme, useTheme } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Button, useTheme, Surface, IconButton, SegmentedButtons } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, usePathname } from 'expo-router';
-import { useDogCounts } from '../state/DogCountsProvider';
-import { logEvent } from '../utils/logger';
+import { useDogCounts } from "../state/DogCountsProvider";
+import { logEvent } from "../utils/logger";
+
+type NavKey = "home" | "new" | "list" | "my";
+
+export const ROUTES = {
+  home: "/" as Href,
+  new: "/new-dog" as Href,
+  list: "/dogs-list" as Href,
+  my: "/my-dogs-list" as Href,
+  me: "/me" as Href,
+} as const;
+
+function keyFromPathname(pathname: string): NavKey {
+  if (pathname === "/" || pathname.startsWith("/home")) return "home";
+  if (pathname.startsWith("/new-dog")) return "new";
+  if (pathname.startsWith("/my-dogs-list")) return "my";
+  if (pathname.startsWith("/dogs") || pathname.startsWith("/dog-profile"))
+    return "list";
+  return "home";
+}
 
 export function TopNav() {
-  const router = useRouter();
+  const theme = useTheme<MD3Theme>();
+  const insets = useSafeAreaInsets();
+
   const pathname = usePathname();
-  const theme = useTheme();
+  const activeKey = useMemo(() => keyFromPathname(pathname ?? "/"), [pathname]);
+
   const { myDogsCount } = useDogCounts();
+  const myDogsLabel = myDogsCount === 1 ? "My Dog" : "My Dogs";
 
-  // Smart pluralization for My Dog(s) button
-  const myDogsLabel = myDogsCount === 1 ? 'My Dog' : 'My Dogs';
-
-  // Map pathname to active screen
-  const getActiveScreen = (): string => {
-    if (pathname === '/') return 'home';
-    if (pathname === '/new-dog') return 'new';
-    if (pathname === '/dogs-list') return 'list';
-    if (pathname === '/my-dogs-list') return 'myDogs';
-    return '';
-  };
-
-  const activeScreen = getActiveScreen();
-
-  const handleHome = () => {
-    logEvent('Nav:top:home');
-    router.replace('/');
-  };
-
-  const handleNewDog = () => {
-    logEvent('Nav:top:new_dog');
-    router.replace('/new-dog');
-  };
-
-  const handleListOrMyDogs = (value: string) => {
-    if (value === 'list') {
-      logEvent('Nav:top:list');
-      router.replace('/dogs-list');
-    } else if (value === 'myDogs') {
-      logEvent('Nav:top:my_dogs');
-      router.replace('/my-dogs-list');
+  const go = (key: NavKey) => {
+    const to = ROUTES[key];
+    if (!to) {
+      console.error("TopNav missing route for key:", key, ROUTES);
+      return;
     }
+    logEvent(`Nav:top:${key}`, { to });
+    router.replace(to);
   };
+
+  const styles = useMemo(() => makeStyles(theme), [theme]);
 
   return (
-    <SafeAreaView edges={['top']} style={{ backgroundColor: theme.colors.surface }}>
-      <Surface 
-        style={[
-          styles.container, 
-          { 
-            backgroundColor: theme.colors.surface,
-            borderBottomWidth: 1,
-            borderBottomColor: theme.dark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)',
-          }
-        ]} 
-        elevation={1}
+    <View style={[styles.wrapper, { paddingTop: insets.top + 6 }]}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.row}
       >
-        <View style={styles.buttonsRow}>
-          {/* Home Button */}
-          <IconButton
-            icon="home"
-            size={24}
-            mode={activeScreen === 'home' ? 'contained' : 'contained-tonal'}
-            onPress={handleHome}
-            style={styles.homeButton}
-          />
+        <Button
+          mode={activeKey === "home" ? "contained-tonal" : "outlined"}
+          onPress={() => go("home")}
+          compact
+          style={[
+            styles.button,
+            activeKey === "home" ? styles.buttonActive : null,
+          ]}
+          contentStyle={styles.buttonContent}
+          labelStyle={styles.buttonLabel}
+        >
+          Home
+        </Button>
+        <Button
+          mode="contained"
+          onPress={() => go("new")}
+          compact
+          style={[
+            styles.button,
+            styles.newButton,
+            activeKey === "new" ? styles.buttonActive : null,
+          ]}
+          contentStyle={styles.buttonContent}
+          labelStyle={styles.buttonLabel}
+        >
+          New Dog
+        </Button>
 
-          {/* New Dog Button */}
-          <Button
-            mode="contained"
-            onPress={handleNewDog}
-            style={[
-              styles.newDogButton, 
-              { backgroundColor: activeScreen === 'new' ? '#388E3C' : '#4CAF50' }
-            ]}
-            contentStyle={styles.buttonContent}
-            labelStyle={styles.buttonLabel}
-            accessibilityLabel="New Dog"
-            compact
-          >
-            New
-          </Button>
+        <Button
+          mode={activeKey === "list" ? "contained-tonal" : "outlined"}
+          onPress={() => go("list")}
+          compact
+          style={[
+            styles.button,
+            activeKey === "list" ? styles.buttonActive : null,
+          ]}
+          contentStyle={styles.buttonContent}
+          labelStyle={styles.buttonLabel}
+        >
+          All Dogs
+        </Button>
 
-          {/* List / My Dogs Segmented Buttons */}
-          <View style={styles.segmentedContainer}>
-            <SegmentedButtons
-              value={activeScreen === 'list' ? 'list' : activeScreen === 'myDogs' ? 'myDogs' : ''}
-              onValueChange={handleListOrMyDogs}
-              density="small"
-              style={styles.segmentedButtons}
-              buttons={[
-                {
-                  value: 'list',
-                  label: 'All Dogs',
-                  style: styles.segmentButton,
-                },
-                {
-                  value: 'myDogs',
-                  label: myDogsLabel,
-                  style: styles.segmentButton,
-                },
-              ]}
-            />
-          </View>
-        </View>
-      </Surface>
-    </SafeAreaView>
+        <Button
+          mode={activeKey === "my" ? "contained-tonal" : "outlined"}
+          onPress={() => go("my")}
+          compact
+          style={[
+            styles.button,
+            activeKey === "my" ? styles.buttonActive : null,
+          ]}
+          contentStyle={styles.buttonContent}
+          labelStyle={styles.buttonLabel}
+        >
+          {myDogsLabel}
+        </Button>
+      </ScrollView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  buttonsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    minHeight: 44,
-  },
-  homeButton: {
-    margin: 0,
-  },
-  newDogButton: {
-    borderRadius: 8,
-    minHeight: 40,
-  },
-  buttonContent: {
-    height: 40,
-    paddingHorizontal: 12,
-  },
-  buttonLabel: {
-    fontSize: 13,
-    lineHeight: 16,
-    fontWeight: '600',
-  },
-  segmentedContainer: {
-    flex: 1,
-  },
-  segmentedButtons: {
-  },
-  segmentButton: {
-    minHeight: 40,
-  },
-});
+function makeStyles(theme: MD3Theme) {
+  const border = theme.colors.outlineVariant ?? theme.colors.outline;
+  const surface = theme.colors.surface;
+
+  return StyleSheet.create({
+    wrapper: {
+      backgroundColor: surface,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: border,
+      paddingHorizontal: 12,
+      // paddingTop is now dynamic via safe-area inset
+      paddingBottom: 8,
+    },
+    row: {
+      alignItems: "center",
+      gap: 8,
+    },
+    homeWrap: {
+      borderRadius: 12,
+      overflow: "hidden",
+    },
+    homeButton: {
+      margin: 0,
+      borderRadius: 12,
+      backgroundColor: theme.colors.surfaceVariant,
+      width: 40,
+      height: 40,
+    },
+    homeButtonActive: {
+      backgroundColor: theme.colors.primary,
+    },
+    button: {
+      borderRadius: 12,
+    },
+    buttonContent: {
+      height: 40,
+      paddingHorizontal: 10,
+    },
+    buttonLabel: {
+      fontSize: 12,
+      letterSpacing: 0,
+    },
+    newButton: {
+      backgroundColor: theme.colors.primary,
+    },
+    buttonActive: {
+      borderColor: theme.colors.primary,
+    },
+  });
+}
