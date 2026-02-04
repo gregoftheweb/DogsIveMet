@@ -33,7 +33,7 @@ type SortOption = 'newest' | 'oldest';
 
 interface PendingDelete {
   dog: Dog;
-  timer: NodeJS.Timeout;
+  timer: ReturnType<typeof setTimeout>;
 }
 
 export default function DogsListScreen() {
@@ -419,7 +419,7 @@ export default function DogsListScreen() {
           // Simply hide the snackbar when swiped away
           // The timer in handleDeletePress will still auto-commit the delete
         }}
-        duration={Snackbar.DURATION_INDEFINITE}
+        duration={5000}
         action={{
           label: 'Undo',
           onPress: handleUndo,
