@@ -54,7 +54,17 @@ export function TopNav() {
 
   return (
     <SafeAreaView edges={['top']} style={{ backgroundColor: theme.colors.surface }}>
-      <Surface style={[styles.container, { backgroundColor: theme.colors.surface }]} elevation={1}>
+      <Surface 
+        style={[
+          styles.container, 
+          { 
+            backgroundColor: theme.colors.surface,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.dark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)',
+          }
+        ]} 
+        elevation={1}
+      >
         <View style={styles.buttonsRow}>
           {/* Home Button */}
           <IconButton
@@ -75,30 +85,33 @@ export function TopNav() {
             ]}
             contentStyle={styles.buttonContent}
             labelStyle={styles.buttonLabel}
+            accessibilityLabel="New Dog"
             compact
           >
             New
           </Button>
 
           {/* List / My Dogs Segmented Buttons */}
-          <SegmentedButtons
-            value={activeScreen === 'list' || activeScreen === 'myDogs' ? activeScreen : 'list'}
-            onValueChange={handleListOrMyDogs}
-            density="small"
-            style={styles.segmentedButtons}
-            buttons={[
-              {
-                value: 'list',
-                label: 'List',
-                style: styles.segmentButton,
-              },
-              {
-                value: 'myDogs',
-                label: myDogsLabel,
-                style: styles.segmentButton,
-              },
-            ]}
-          />
+          <View style={styles.segmentedContainer}>
+            <SegmentedButtons
+              value={activeScreen === 'list' ? 'list' : activeScreen === 'myDogs' ? 'myDogs' : ''}
+              onValueChange={handleListOrMyDogs}
+              density="small"
+              style={styles.segmentedButtons}
+              buttons={[
+                {
+                  value: 'list',
+                  label: 'All Dogs',
+                  style: styles.segmentButton,
+                },
+                {
+                  value: 'myDogs',
+                  label: myDogsLabel,
+                  style: styles.segmentButton,
+                },
+              ]}
+            />
+          </View>
         </View>
       </Surface>
     </SafeAreaView>
@@ -109,8 +122,6 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
   },
   buttonsRow: {
     flexDirection: 'row',
@@ -134,8 +145,10 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     fontWeight: '600',
   },
-  segmentedButtons: {
+  segmentedContainer: {
     flex: 1,
+  },
+  segmentedButtons: {
   },
   segmentButton: {
     minHeight: 40,
