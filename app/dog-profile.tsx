@@ -288,6 +288,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   photoCard: {
+    width: '100%',
     marginBottom: 24,
     overflow: 'hidden',
     aspectRatio: 1,
