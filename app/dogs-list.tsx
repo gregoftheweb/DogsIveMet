@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   StyleSheet,
   View,
@@ -9,15 +9,21 @@ import {
   RefreshControl,
   Modal,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { Dog } from '@/src/types/Dog';
-import { getDogs } from '@/src/storage/dogs';
+import { getDogs, deleteDog } from '@/src/storage/dogs';
 import { logEvent, logError } from '@/src/utils/logger';
 
 type SortOption = 'newest' | 'oldest';
+
+interface PendingDelete {
+  dog: Dog;
+  timer: NodeJS.Timeout;
+}
 
 export default function DogsListScreen() {
   const router = useRouter();
@@ -31,18 +37,26 @@ export default function DogsListScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [breedModalVisible, setBreedModalVisible] = useState(false);
   const [availableBreeds, setAvailableBreeds] = useState<string[]>(['All Breeds']);
+  
+  // Undo state
+  const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
+  const pendingDeleteRef = useRef<PendingDelete | null>(null);
 
   // Log screen lifecycle
   useEffect(() => {
     logEvent('DogsList:screen:mount');
     return () => {
       logEvent('DogsList:screen:unmount');
+      // Clean up pending delete timer on unmount
+      if (pendingDeleteRef.current) {
+        clearTimeout(pendingDeleteRef.current.timer);
+      }
     };
   }, []);
 
   // Load dogs function
   const loadDogs = useCallback(async () => {
-    logEvent('DogsList:load:start');
+    logEvent('DogsList:load:on_focus');
     try {
       const dogs = await getDogs();
       setAllDogs(dogs);
@@ -153,6 +167,92 @@ export default function DogsListScreen() {
     router.push('/new-dog');
   };
 
+  // Commit pending delete to storage
+  const commitDelete = useCallback(async (dog: Dog) => {
+    logEvent('DogsList:delete:commit', { id: dog.id });
+    try {
+      await deleteDog(dog.id);
+      // Reload list from storage to ensure consistency
+      await loadDogs();
+    } catch (error) {
+      logError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'DogsList:delete:error',
+        id: dog.id,
+      });
+      // On error, reload from storage and show alert
+      await loadDogs();
+      Alert.alert(
+        'Delete Failed',
+        'Could not delete the dog. The list has been refreshed.',
+        [{ text: 'OK' }]
+      );
+    }
+  }, [loadDogs]);
+
+  // Handle delete press (with long-press)
+  const handleDeletePress = useCallback((dog: Dog) => {
+    logEvent('DogsList:delete:press', { id: dog.id });
+
+    Alert.alert(
+      'Delete dog?',
+      `Remove "${dog.name}" from your list?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            // If there's already a pending delete, commit it immediately
+            if (pendingDeleteRef.current) {
+              clearTimeout(pendingDeleteRef.current.timer);
+              commitDelete(pendingDeleteRef.current.dog);
+            }
+
+            // Remove from visible list (optimistic UI)
+            setAllDogs(prev => prev.filter(d => d.id !== dog.id));
+
+            // Set up undo timer (5 seconds)
+            const timer = setTimeout(() => {
+              commitDelete(dog);
+              setPendingDelete(null);
+              pendingDeleteRef.current = null;
+            }, 5000);
+
+            const pending = { dog, timer };
+            setPendingDelete(pending);
+            pendingDeleteRef.current = pending;
+          },
+        },
+      ]
+    );
+  }, [commitDelete]);
+
+  // Handle undo
+  const handleUndo = useCallback(() => {
+    if (!pendingDelete) return;
+
+    logEvent('DogsList:delete:undo', { id: pendingDelete.dog.id });
+
+    // Clear the timer
+    clearTimeout(pendingDelete.timer);
+
+    // Restore dog to list
+    setAllDogs(prev => {
+      const exists = prev.find(d => d.id === pendingDelete.dog.id);
+      if (exists) {
+        return prev; // Already in list somehow
+      }
+      return [...prev, pendingDelete.dog];
+    });
+
+    // Clear pending delete
+    setPendingDelete(null);
+    pendingDeleteRef.current = null;
+  }, [pendingDelete]);
+
   // Format date for display
   const formatDate = (isoDate: string): string => {
     const date = new Date(isoDate);
@@ -171,6 +271,8 @@ export default function DogsListScreen() {
         pressed && styles.dogRowPressed,
       ]}
       onPress={() => handleDogPress(item.id)}
+      onLongPress={() => handleDeletePress(item)}
+      delayLongPress={500}
     >
       <View style={styles.dogRowContent}>
         <Text style={styles.dogName}>{item.name}</Text>
@@ -317,6 +419,27 @@ export default function DogsListScreen() {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         />
+      )}
+
+      {/* Undo Banner */}
+      {pendingDelete && (
+        <View style={styles.undoBanner}>
+          <View style={styles.undoBannerContent}>
+            <Ionicons name="trash-outline" size={18} color="#fff" />
+            <Text style={styles.undoBannerText}>
+              Deleted "{pendingDelete.dog.name}"
+            </Text>
+          </View>
+          <Pressable
+            style={({ pressed }) => [
+              styles.undoButton,
+              pressed && styles.undoButtonPressed,
+            ]}
+            onPress={handleUndo}
+          >
+            <Text style={styles.undoButtonText}>Undo</Text>
+          </Pressable>
+        </View>
       )}
 
       {/* Footer */}
@@ -636,5 +759,41 @@ const styles = StyleSheet.create({
   breedOptionTextSelected: {
     fontWeight: '600',
     color: '#007AFF',
+  },
+  undoBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#333',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#444',
+  },
+  undoBannerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+  },
+  undoBannerText: {
+    color: '#fff',
+    fontSize: 15,
+    flex: 1,
+  },
+  undoButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  undoButtonPressed: {
+    backgroundColor: '#0051D5',
+    transform: [{ scale: 0.96 }],
+  },
+  undoButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });
