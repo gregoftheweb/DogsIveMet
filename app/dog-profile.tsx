@@ -16,6 +16,19 @@ import { Dog } from '@/src/types/Dog';
 import { getDogById, deleteDog } from '@/src/storage/dogs';
 import { logEvent, logError } from '@/src/utils/logger';
 
+// Format date/time for display
+function formatDateTime(isoDate: string): string {
+  const date = new Date(isoDate);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }) + ' at ' + date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
 export default function DogProfileScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -130,19 +143,6 @@ export default function DogProfileScreen() {
     logEvent('Nav:to:DogsList');
     router.back();
   };
-
-  // Format date/time for display
-  const formatDateTime = useCallback((isoDate: string): string => {
-    const date = new Date(isoDate);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    }) + ' at ' + date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-    });
-  }, []);
 
   // Loading state
   if (loading) {
