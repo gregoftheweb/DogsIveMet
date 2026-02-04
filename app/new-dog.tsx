@@ -37,6 +37,9 @@ const BREEDS = [
 // Delay before navigation to allow toast to be visible
 const TOAST_NAVIGATION_DELAY_MS = 500;
 
+// URI preview length for logging (show last N characters)
+const URI_LOG_PREVIEW_LENGTH = 12;
+
 // Error message constants
 const SAVE_ERROR_MESSAGE = 'Failed to save dog. Please try again.';
 
@@ -186,7 +189,7 @@ export default function NewDogScreen() {
         const uri = result.assets[0].uri;
         setPhotoUri(uri);
         if (isEditMode) {
-          const uriLog = uri ? `...${uri.slice(-12)}` : 'none';
+          const uriLog = uri ? `...${uri.slice(-URI_LOG_PREVIEW_LENGTH)}` : 'none';
           logEvent(`${eventPrefix}:success`, { uriPreview: uriLog });
         } else {
           logEvent('New Dog - Photo captured successfully');
@@ -258,7 +261,7 @@ export default function NewDogScreen() {
         // Create new dog
         const id = typeof crypto !== 'undefined' && crypto.randomUUID 
           ? crypto.randomUUID() 
-          : `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          : `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
         
         const now = new Date().toISOString();
         
