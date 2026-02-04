@@ -88,10 +88,10 @@ export default function MyDogsListScreen() {
       );
     }
 
-    // Sort by date
+    // Sort by date (use createdAt for My Dogs since these are user's own dogs)
     result.sort((a, b) => {
-      const dateA = new Date(a.metAt).getTime();
-      const dateB = new Date(b.metAt).getTime();
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
       return sortOption === 'newest' ? dateB - dateA : dateA - dateB;
     });
 
@@ -178,7 +178,7 @@ export default function MyDogsListScreen() {
       <View style={styles.dogRowContent}>
         <Text style={styles.dogName}>{item.name}</Text>
         <Text style={styles.dogBreed}>{item.breed}</Text>
-        <Text style={styles.dogDate}>{formatDate(item.metAt)}</Text>
+        <Text style={styles.dogDate}>Added {formatDate(item.createdAt)}</Text>
       </View>
       <Ionicons name="chevron-forward" size={20} color="#999" />
     </Pressable>
