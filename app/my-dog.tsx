@@ -1,24 +1,28 @@
 import React from 'react';
 import { StyleSheet, View, Text, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
+import { TopNav } from '@/src/ui/TopNav';
 
 export default function MyDogScreen() {
   const router = useRouter();
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>My Dog Screen</Text>
+    <>
+      <TopNav />
+      <View style={styles.container}>
+        <Text style={styles.title}>My Dog Screen</Text>
 
-      <Pressable
-        style={({ pressed }) => [
-          styles.button,
-          pressed && styles.buttonPressed,
-        ]}
-        onPress={() => router.back()}
-      >
-        <Text style={styles.buttonText}>Back to Home</Text>
-      </Pressable>
-    </View>
+        <Pressable
+          style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed,
+          ]}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.buttonText}>Back to Home</Text>
+        </Pressable>
+      </View>
+    </>
   );
 }
 

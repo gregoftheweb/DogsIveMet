@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Button, Text, useTheme, SegmentedButtons } from 'react-native-paper';
 import { ScreenContainer } from '@/src/ui/ScreenContainer';
+import { TopNav } from '@/src/ui/TopNav';
 import { useThemeMode } from '@/src/theme/ThemeProvider';
 
 export default function MeScreen() {
@@ -11,7 +12,9 @@ export default function MeScreen() {
   const { themeMode, setThemeMode } = useThemeMode();
 
   return (
-    <ScreenContainer>
+    <>
+      <TopNav />
+      <ScreenContainer>
       <View style={styles.container}>
         <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.onBackground }]}>
           Me Screen
@@ -49,6 +52,7 @@ export default function MeScreen() {
         </Button>
       </View>
     </ScreenContainer>
+    </>
   );
 }
 

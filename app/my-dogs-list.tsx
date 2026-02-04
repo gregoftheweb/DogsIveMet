@@ -24,12 +24,15 @@ import {
 import { Dog } from '@/src/types/Dog';
 import { getMyDogs } from '@/src/storage/dogs';
 import { logEvent, logError } from '@/src/utils/logger';
+import { TopNav } from '@/src/ui/TopNav';
+import { useDogCounts } from '@/src/state/DogCountsProvider';
 
 type SortOption = 'newest' | 'oldest';
 
 export default function MyDogsListScreen() {
   const router = useRouter();
   const theme = useTheme();
+  const { refreshCounts } = useDogCounts();
   
   // State
   const [allMyDogs, setAllMyDogs] = useState<Dog[]>([]);
@@ -77,7 +80,8 @@ export default function MyDogsListScreen() {
   useFocusEffect(
     useCallback(() => {
       loadMyDogs();
-    }, [loadMyDogs])
+      refreshCounts();
+    }, [loadMyDogs, refreshCounts])
   );
 
   // Filter and sort dogs whenever dependencies change
@@ -194,40 +198,38 @@ export default function MyDogsListScreen() {
   // Empty state - no my dogs saved
   if (allMyDogs.length === 0) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <Appbar.Header style={{ backgroundColor: theme.colors.surface }}>
-          <Appbar.BackAction onPress={() => router.back()} />
-          <Appbar.Content title="My Dogs" />
-        </Appbar.Header>
-
-        <View style={styles.emptyContainer}>
-          <IconButton
-            icon="paw"
-            size={64}
-            iconColor={theme.colors.outline}
-          />
-          <Card style={[styles.emptyCard, { backgroundColor: theme.colors.surface }]}>
-            <Card.Content>
-              <List.Subheader style={styles.emptySubheader}>
-                No dogs added yet.
-              </List.Subheader>
-              <Button
-                mode="contained"
-                onPress={handleAddMyDog}
-                style={styles.emptyCardContent}
-              >
-                Add My Dog
-              </Button>
-              <Button
-                mode="outlined"
-                onPress={handleHomePress}
-              >
-                Home
-              </Button>
-            </Card.Content>
-          </Card>
+      <>
+        <TopNav />
+        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+          <View style={styles.emptyContainer}>
+            <IconButton
+              icon="paw"
+              size={64}
+              iconColor={theme.colors.outline}
+            />
+            <Card style={[styles.emptyCard, { backgroundColor: theme.colors.surface }]}>
+              <Card.Content>
+                <List.Subheader style={styles.emptySubheader}>
+                  No dogs added yet.
+                </List.Subheader>
+                <Button
+                  mode="contained"
+                  onPress={handleAddMyDog}
+                  style={styles.emptyCardContent}
+                >
+                  Add My Dog
+                </Button>
+                <Button
+                  mode="outlined"
+                  onPress={handleHomePress}
+                >
+                  Home
+                </Button>
+              </Card.Content>
+            </Card>
+          </View>
         </View>
-      </View>
+      </>
     );
   }
 
@@ -235,15 +237,11 @@ export default function MyDogsListScreen() {
   const showNoResults = filteredDogs.length === 0;
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      {/* Header */}
-      <Appbar.Header style={{ backgroundColor: theme.colors.surface }}>
-        <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="My Dogs" />
-      </Appbar.Header>
-
-      {/* Controls */}
-      <View style={[styles.controls, { backgroundColor: theme.colors.surface }]}>
+    <>
+      <TopNav />
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        {/* Controls */}
+        <View style={[styles.controls, { backgroundColor: theme.colors.surface }]}>
         {/* Search Input */}
         <Searchbar
           placeholder="Search by name"
@@ -371,6 +369,7 @@ export default function MyDogsListScreen() {
         style={[styles.fab, { backgroundColor: theme.colors.primary }]}
       />
     </View>
+    </>
   );
 }
 

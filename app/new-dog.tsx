@@ -28,6 +28,8 @@ import { addDog, getDogById, updateDog } from '@/src/storage/dogs';
 import { logEvent, logError } from '@/src/utils/logger';
 import { Toast } from '@/components/Toast';
 import { ScreenContainer } from '@/src/ui/ScreenContainer';
+import { TopNav } from '@/src/ui/TopNav';
+import { useDogCounts } from '@/src/state/DogCountsProvider';
 
 const BREEDS = [
   'Unknown',
@@ -54,6 +56,7 @@ export default function NewDogScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const theme = useTheme();
+  const { refreshCounts } = useDogCounts();
   const mode = (params.mode as string) || 'create';
   const dogId = params.id as string | undefined;
   const isMineParam = params.isMine === 'true';
@@ -273,6 +276,9 @@ export default function NewDogScreen() {
         await updateDog(updatedDog);
         logEvent('EditDog:save:success', { id: existingDog.id });
 
+        // Refresh counts after update
+        await refreshCounts();
+
         // Show success feedback
         showToast('Dog updated successfully!', 'success');
 
@@ -314,6 +320,9 @@ export default function NewDogScreen() {
 
         await addDog(newDog);
         logEvent(`${eventPrefix} - Saved to storage successfully`, { id });
+
+        // Refresh counts after save
+        await refreshCounts();
 
         // Show success feedback
         showToast('Dog saved successfully!', 'success');
@@ -384,47 +393,55 @@ export default function NewDogScreen() {
   // Loading state for edit mode
   if (loading) {
     return (
-      <ScreenContainer>
-        <View style={styles.centerContent}>
-          <ActivityIndicator size="large" animating={true} color={theme.colors.primary} />
-          <Text style={[styles.loadingText, { color: theme.colors.onBackground }]}>
-            Loading dog data...
-          </Text>
-        </View>
-      </ScreenContainer>
+      <>
+        <TopNav />
+        <ScreenContainer>
+          <View style={styles.centerContent}>
+            <ActivityIndicator size="large" animating={true} color={theme.colors.primary} />
+            <Text style={[styles.loadingText, { color: theme.colors.onBackground }]}>
+              Loading dog data...
+            </Text>
+          </View>
+        </ScreenContainer>
+      </>
     );
   }
 
   // Not found state for edit mode
   if (isEditMode && notFound) {
     return (
-      <ScreenContainer>
-        <View style={styles.centerContent}>
-          <Ionicons name="alert-circle-outline" size={64} color={theme.colors.onSurfaceVariant} />
-          <Text
-            style={[
-              styles.notFoundText,
-              { color: theme.colors.onBackground, marginVertical: 16 },
-            ]}
-          >
-            Dog not found.
-          </Text>
-          <Button
-            mode="contained"
-            onPress={() => {
-              logEvent('Nav:to:DogsList');
-              router.back();
-            }}
-          >
-            Back to list
-          </Button>
-        </View>
-      </ScreenContainer>
+      <>
+        <TopNav />
+        <ScreenContainer>
+          <View style={styles.centerContent}>
+            <Ionicons name="alert-circle-outline" size={64} color={theme.colors.onSurfaceVariant} />
+            <Text
+              style={[
+                styles.notFoundText,
+                { color: theme.colors.onBackground, marginVertical: 16 },
+              ]}
+            >
+              Dog not found.
+            </Text>
+            <Button
+              mode="contained"
+              onPress={() => {
+                logEvent('Nav:to:DogsList');
+                router.back();
+              }}
+            >
+              Back to list
+            </Button>
+          </View>
+        </ScreenContainer>
+      </>
     );
   }
 
   return (
-    <ScreenContainer scroll={true}>
+    <>
+      <TopNav />
+      <ScreenContainer scroll={true}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.keyboardView}
@@ -574,6 +591,7 @@ export default function NewDogScreen() {
         onHide={() => setToastVisible(false)}
       />
     </ScreenContainer>
+    </>
   );
 }
 

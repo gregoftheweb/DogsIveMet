@@ -28,6 +28,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Dog } from '@/src/types/Dog';
 import { getMetDogs, deleteDog } from '@/src/storage/dogs';
 import { logEvent, logError } from '@/src/utils/logger';
+import { TopNav } from '@/src/ui/TopNav';
+import { useDogCounts } from '@/src/state/DogCountsProvider';
 
 type SortOption = 'newest' | 'oldest';
 
@@ -39,6 +41,7 @@ interface PendingDelete {
 export default function DogsListScreen() {
   const router = useRouter();
   const theme = useTheme();
+  const { refreshCounts } = useDogCounts();
   
   // State
   const [allDogs, setAllDogs] = useState<Dog[]>([]);
@@ -186,6 +189,8 @@ export default function DogsListScreen() {
       await deleteDog(dog.id);
       // Reload list from storage to ensure consistency
       await loadDogs();
+      // Refresh counts after delete
+      await refreshCounts();
     } catch (error) {
       logError(error instanceof Error ? error : new Error(String(error)), {
         context: 'DogsList:delete:error',
@@ -199,7 +204,7 @@ export default function DogsListScreen() {
         [{ text: 'OK' }]
       );
     }
-  }, [loadDogs]);
+  }, [loadDogs, refreshCounts]);
 
   // Handle delete press (with long-press)
   const handleDeletePress = useCallback((dog: Dog) => {
@@ -263,7 +268,10 @@ export default function DogsListScreen() {
     // Clear pending delete
     setPendingDelete(null);
     pendingDeleteRef.current = null;
-  }, [pendingDelete]);
+    
+    // Refresh counts in case it was a "my dog"
+    refreshCounts();
+  }, [pendingDelete, refreshCounts]);
 
   // Format date for display
   const formatDate = (isoDate: string): string => {
@@ -294,38 +302,36 @@ export default function DogsListScreen() {
   // Empty state - no dogs saved
   if (allDogs.length === 0) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <Appbar.Header>
-          <Appbar.BackAction onPress={() => router.back()} />
-          <Appbar.Content title="Dogs I've Met" />
-        </Appbar.Header>
+      <>
+        <TopNav />
+        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+          <View style={styles.emptyContainer}>
+            <Ionicons name="paw-outline" size={64} color={theme.colors.outlineVariant} />
+            <Paragraph style={[styles.emptyTitle, { color: theme.colors.onSurfaceVariant }]}>
+              No dogs saved yet.
+            </Paragraph>
+            <Button
+              mode="contained"
+              onPress={handleAddFirstDog}
+              style={styles.emptyButton}
+              icon="plus"
+            >
+              Add your first dog
+            </Button>
+          </View>
 
-        <View style={styles.emptyContainer}>
-          <Ionicons name="paw-outline" size={64} color={theme.colors.outlineVariant} />
-          <Paragraph style={[styles.emptyTitle, { color: theme.colors.onSurfaceVariant }]}>
-            No dogs saved yet.
-          </Paragraph>
-          <Button
-            mode="contained"
-            onPress={handleAddFirstDog}
-            style={styles.emptyButton}
-            icon="plus"
-          >
-            Add your first dog
-          </Button>
+          <View style={[styles.footer, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.outlineVariant }]}>
+            <Button
+              mode="contained"
+              onPress={handleHomePress}
+              style={styles.homeButton}
+              icon="home"
+            >
+              Home
+            </Button>
+          </View>
         </View>
-
-        <View style={[styles.footer, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.outlineVariant }]}>
-          <Button
-            mode="contained"
-            onPress={handleHomePress}
-            style={styles.homeButton}
-            icon="home"
-          >
-            Home
-          </Button>
-        </View>
-      </View>
+      </>
     );
   }
 
@@ -333,13 +339,9 @@ export default function DogsListScreen() {
   const showNoResults = filteredDogs.length === 0;
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      {/* Header */}
-      <Appbar.Header>
-        <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Dogs I've Met" />
-      </Appbar.Header>
-
+    <>
+      <TopNav />
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Controls */}
       <Surface style={[styles.controls, { backgroundColor: theme.colors.surface }]}>
         {/* Search Input */}
@@ -499,6 +501,7 @@ export default function DogsListScreen() {
         </View>
       </Modal>
     </View>
+    </>
   );
 }
 

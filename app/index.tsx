@@ -3,6 +3,7 @@ import { StyleSheet, View, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Button, Text, Card, useTheme } from 'react-native-paper';
 import { ScreenContainer } from '@/src/ui/ScreenContainer';
+import { TopNav } from '@/src/ui/TopNav';
 import { logEvent } from '@/src/utils/logger';
 
 export default function HomeScreen() {
@@ -10,8 +11,10 @@ export default function HomeScreen() {
   const theme = useTheme();
 
   return (
-    <ScreenContainer scroll>
-      <View style={styles.container}>
+    <>
+      <TopNav />
+      <ScreenContainer scroll>
+        <View style={styles.container}>
         {/* App Title */}
         <Text variant="displaySmall" style={[styles.title, { color: theme.colors.onBackground }]}>
           Dogs I've Met
@@ -79,6 +82,7 @@ export default function HomeScreen() {
         </Card>
       </View>
     </ScreenContainer>
+    </>
   );
 }
 

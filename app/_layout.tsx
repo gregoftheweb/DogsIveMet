@@ -10,6 +10,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { ThemeProvider, useThemeMode } from '@/src/theme/ThemeProvider';
+import { DogCountsProvider } from '@/src/state/DogCountsProvider';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -47,7 +48,9 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider>
-      <RootLayoutNav />
+      <DogCountsProvider>
+        <RootLayoutNav />
+      </DogCountsProvider>
     </ThemeProvider>
   );
 }
@@ -66,12 +69,12 @@ function RootLayoutNav() {
       <NavigationThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="new-dog" options={{ title: 'New Dog' }} />
-          <Stack.Screen name="dogs-list" options={{ title: 'List of Dogs' }} />
-          <Stack.Screen name="dog-profile" options={{ title: 'Dog Profile' }} />
-          <Stack.Screen name="my-dog" options={{ title: 'My Dog' }} />
-          <Stack.Screen name="me" options={{ title: 'Me' }} />
-          <Stack.Screen name="my-dogs-list" options={{ title: 'My Dogs' }} />
+          <Stack.Screen name="new-dog" options={{ headerShown: false }} />
+          <Stack.Screen name="dogs-list" options={{ headerShown: false }} />
+          <Stack.Screen name="dog-profile" options={{ headerShown: false }} />
+          <Stack.Screen name="my-dog" options={{ headerShown: false }} />
+          <Stack.Screen name="me" options={{ headerShown: false }} />
+          <Stack.Screen name="my-dogs-list" options={{ headerShown: false }} />
         </Stack>
       </NavigationThemeProvider>
     </PaperProvider>
