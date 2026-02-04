@@ -23,17 +23,24 @@ export function ScreenContainer({ children, scroll = false, style }: ScreenConta
     style,
   ];
 
-  const contentStyle = [
-    styles.content,
-    { backgroundColor: theme.colors.background },
-  ];
+  // For scroll mode, don't use flex: 1 - let content grow naturally
+  // For non-scroll mode, use flex: 1 to enable centering
+  const contentStyle = scroll
+    ? [
+        styles.scrollableContent,
+        { backgroundColor: theme.colors.background },
+      ]
+    : [
+        styles.content,
+        { backgroundColor: theme.colors.background },
+      ];
 
   if (scroll) {
     return (
       <SafeAreaView style={containerStyle} edges={['top', 'left', 'right']}>
         <ScrollView 
           style={styles.scrollView}
-          contentContainerStyle={[styles.scrollContent, contentStyle]}
+          contentContainerStyle={contentStyle}
           keyboardShouldPersistTaps="handled"
         >
           {children}
@@ -58,9 +65,15 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  scrollContent: {
-    flexGrow: 1,
+  // For scrollable content - no flex: 1, just padding and centering
+  scrollableContent: {
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
   },
+  // For non-scrollable content - flex: 1 enables centering
   content: {
     flex: 1,
     width: '100%',

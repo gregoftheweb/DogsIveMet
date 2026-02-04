@@ -579,7 +579,7 @@ export default function NewDogScreen() {
 
 const styles = StyleSheet.create({
   keyboardView: {
-    flex: 1,
+    // Removed flex: 1 to allow ScrollView to work properly
   },
   inputContainer: {
     marginBottom: 16,
