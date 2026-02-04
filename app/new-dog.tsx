@@ -185,9 +185,12 @@ export default function NewDogScreen() {
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const uri = result.assets[0].uri;
         setPhotoUri(uri);
-        const uriLog = uri ? `...${uri.slice(-12)}` : 'none';
-        logEvent(isEditMode ? `${eventPrefix}:success` : 'New Dog - Photo captured successfully', 
-          isEditMode ? { uriPreview: uriLog } : undefined);
+        if (isEditMode) {
+          const uriLog = uri ? `...${uri.slice(-12)}` : 'none';
+          logEvent(`${eventPrefix}:success`, { uriPreview: uriLog });
+        } else {
+          logEvent('New Dog - Photo captured successfully');
+        }
       } else {
         logEvent(isEditMode ? `${eventPrefix}:cancel` : 'New Dog - Photo capture cancelled');
       }
@@ -233,7 +236,6 @@ export default function NewDogScreen() {
           // Preserve original timestamps (updatedAt will be set by updateDog)
           metAt: existingDog.metAt,
           createdAt: existingDog.createdAt,
-          updatedAt: existingDog.updatedAt, // Temporary, updateDog will overwrite this
         };
 
         logEvent('EditDog:save:dog_object_created', { id: existingDog.id, name: trimmedName, breed });
