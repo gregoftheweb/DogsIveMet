@@ -37,7 +37,7 @@ export function ScreenContainer({ children, scroll = false, style }: ScreenConta
 
   if (scroll) {
     return (
-      <SafeAreaView style={containerStyle} edges={['top', 'left', 'right']}>
+      <SafeAreaView style={containerStyle} edges={['left', 'right', 'bottom']}>
         <ScrollView 
           style={styles.scrollView}
           contentContainerStyle={contentStyle}
@@ -50,7 +50,7 @@ export function ScreenContainer({ children, scroll = false, style }: ScreenConta
   }
 
   return (
-    <SafeAreaView style={containerStyle} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={containerStyle} edges={['left', 'right', 'bottom']}>
       <View style={contentStyle}>
         {children}
       </View>
