@@ -261,7 +261,7 @@ export default function NewDogScreen() {
         // Create new dog
         const id = typeof crypto !== 'undefined' && crypto.randomUUID 
           ? crypto.randomUUID() 
-          : `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+          : `${Date.now()}-${Math.random().toString(36).substring(2, 11).padEnd(9, '0')}`;
         
         const now = new Date().toISOString();
         
