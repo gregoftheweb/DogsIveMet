@@ -50,7 +50,7 @@ export default function HomeScreen() {
             router.push('/my-dogs-list');
           }}
         >
-          <Text style={styles.buttonText}>My Dog</Text>
+          <Text style={styles.buttonText}>My Dogs</Text>
         </Pressable>
 
         <Pressable

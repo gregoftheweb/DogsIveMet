@@ -178,7 +178,7 @@ export default function MyDogsListScreen() {
       <View style={styles.dogRowContent}>
         <Text style={styles.dogName}>{item.name}</Text>
         <Text style={styles.dogBreed}>{item.breed}</Text>
-        <Text style={styles.dogDate}>Added {formatDate(item.createdAt)}</Text>
+        <Text style={styles.dogDate}>{formatDate(item.createdAt)}</Text>
       </View>
       <Ionicons name="chevron-forward" size={20} color="#999" />
     </Pressable>
