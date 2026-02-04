@@ -15,7 +15,7 @@ import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { Dog } from '@/src/types/Dog';
-import { getDogs, deleteDog } from '@/src/storage/dogs';
+import { getMetDogs, deleteDog } from '@/src/storage/dogs';
 import { logEvent, logError } from '@/src/utils/logger';
 
 type SortOption = 'newest' | 'oldest';
@@ -58,7 +58,7 @@ export default function DogsListScreen() {
   const loadDogs = useCallback(async () => {
     logEvent('DogsList:load:on_focus');
     try {
-      const dogs = await getDogs();
+      const dogs = await getMetDogs();
       setAllDogs(dogs);
       
       // Extract unique breeds
