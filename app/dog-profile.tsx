@@ -69,12 +69,7 @@ export default function DogProfileScreen() {
     }
   }, [id]);
 
-  // Load on mount
-  useEffect(() => {
-    loadDog();
-  }, [loadDog]);
-
-  // Reload on focus
+  // Reload on focus (also handles initial mount)
   useFocusEffect(
     useCallback(() => {
       loadDog();
@@ -137,7 +132,7 @@ export default function DogProfileScreen() {
   };
 
   // Format date/time for display
-  const formatDateTime = (isoDate: string): string => {
+  const formatDateTime = useCallback((isoDate: string): string => {
     const date = new Date(isoDate);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
@@ -147,7 +142,7 @@ export default function DogProfileScreen() {
       hour: 'numeric',
       minute: '2-digit',
     });
-  };
+  }, []);
 
   // Loading state
   if (loading) {
