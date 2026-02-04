@@ -230,11 +230,10 @@ export default function NewDogScreen() {
           photoUri: photoUri || undefined,
           metLocationText: metLocationText.trim() || undefined,
           notes: notes.trim() || undefined,
-          // Preserve original timestamps
+          // Preserve original timestamps (updatedAt will be set by updateDog)
           metAt: existingDog.metAt,
           createdAt: existingDog.createdAt,
-          // Set updatedAt (will be overwritten by updateDog function)
-          updatedAt: new Date().toISOString(),
+          updatedAt: existingDog.updatedAt, // Temporary, updateDog will overwrite this
         };
 
         logEvent('EditDog:save:dog_object_created', { id: existingDog.id, name: trimmedName, breed });
@@ -494,6 +493,8 @@ export default function NewDogScreen() {
             ]}
             onPress={handleCancel}
             disabled={isSaving}
+            accessibilityLabel={isSaving ? 'Cancel (disabled while saving)' : 'Cancel'}
+            accessibilityState={{ disabled: isSaving }}
           >
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </Pressable>
