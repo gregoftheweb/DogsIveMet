@@ -214,8 +214,20 @@ export default function NewDogScreen() {
   };
 
   const handleSave = async () => {
-    const eventPrefix = isEditMode ? 'EditDog' : (isMineParam ? 'MyDogForm' : 'New Dog');
-    logEvent(`${eventPrefix}:save:press`, { name: name.trim(), breed, ...(isMineParam && !isEditMode ? { isMine: true } : {}) });
+    // Helper to get the appropriate event prefix based on mode
+    const getEventPrefix = () => {
+      if (isEditMode) return 'EditDog';
+      return isMineParam ? 'MyDogForm' : 'New Dog';
+    };
+
+    const eventPrefix = getEventPrefix();
+    const logMetadata = isMineParam && !isEditMode ? { isMine: true } : {};
+    
+    logEvent(`${eventPrefix}:save:press`, { 
+      name: name.trim(), 
+      breed, 
+      ...logMetadata 
+    });
 
     // Validate required fields
     const trimmedName = name.trim();
@@ -231,8 +243,7 @@ export default function NewDogScreen() {
     }
 
     setIsSaving(true);
-    const writeLogPrefix = isEditMode ? 'EditDog' : (isMineParam ? 'MyDogForm' : 'New Dog');
-    logEvent(`${writeLogPrefix}:save:write_start`);
+    logEvent(`${eventPrefix}:save:write_start`);
 
     try {
       if (isEditMode && existingDog) {
@@ -286,18 +297,22 @@ export default function NewDogScreen() {
           ...(isMineParam ? { isMine: true } : {}),
         };
 
-        const logPrefix = isMineParam ? 'MyDogForm' : 'New Dog';
-        logEvent(`${logPrefix} - Dog object created`, { id, name: trimmedName, breed, ...(isMineParam ? { isMine: true } : {}) });
+        logEvent(`${eventPrefix} - Dog object created`, { 
+          id, 
+          name: trimmedName, 
+          breed, 
+          ...logMetadata 
+        });
 
         await addDog(newDog);
-        logEvent(`${logPrefix} - Saved to storage successfully`, { id });
+        logEvent(`${eventPrefix} - Saved to storage successfully`, { id });
 
         // Show success feedback
         showToast('Dog saved successfully!', 'success');
 
         // Navigate to dog profile
         setTimeout(() => {
-          logEvent(`${logPrefix} - Navigating to dog profile`, { id });
+          logEvent(`${eventPrefix} - Navigating to dog profile`, { id });
           router.push({
             pathname: '/dog-profile',
             params: { id: newDog.id },
