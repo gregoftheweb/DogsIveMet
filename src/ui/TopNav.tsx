@@ -7,6 +7,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, useTheme, Surface } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useDogCounts } from '../state/DogCountsProvider';
 import { logEvent } from '../utils/logger';
@@ -35,42 +36,44 @@ export function TopNav() {
   };
 
   return (
-    <Surface style={[styles.container, { backgroundColor: theme.colors.surface }]} elevation={1}>
-      <View style={styles.buttonsRow}>
-        <Button
-          mode="contained"
-          onPress={handleNewDog}
-          style={[styles.button, styles.newDogButton, { backgroundColor: '#4CAF50' }]}
-          contentStyle={styles.buttonContent}
-          labelStyle={styles.buttonLabel}
-          compact
-        >
-          New Dog
-        </Button>
+    <SafeAreaView edges={['top']} style={{ backgroundColor: theme.colors.surface }}>
+      <Surface style={[styles.container, { backgroundColor: theme.colors.surface }]} elevation={1}>
+        <View style={styles.buttonsRow}>
+          <Button
+            mode="contained"
+            onPress={handleNewDog}
+            style={[styles.button, styles.newDogButton, { backgroundColor: '#4CAF50' }]}
+            contentStyle={styles.buttonContent}
+            labelStyle={styles.buttonLabel}
+            compact
+          >
+            New Dog
+          </Button>
 
-        <Button
-          mode="contained-tonal"
-          onPress={handleList}
-          style={styles.button}
-          contentStyle={styles.buttonContent}
-          labelStyle={styles.buttonLabel}
-          compact
-        >
-          List of Dogs
-        </Button>
+          <Button
+            mode="contained-tonal"
+            onPress={handleList}
+            style={styles.button}
+            contentStyle={styles.buttonContent}
+            labelStyle={styles.buttonLabel}
+            compact
+          >
+            List of Dogs
+          </Button>
 
-        <Button
-          mode="contained-tonal"
-          onPress={handleMyDogs}
-          style={styles.button}
-          contentStyle={styles.buttonContent}
-          labelStyle={styles.buttonLabel}
-          compact
-        >
-          {myDogsLabel}
-        </Button>
-      </View>
-    </Surface>
+          <Button
+            mode="contained-tonal"
+            onPress={handleMyDogs}
+            style={styles.button}
+            contentStyle={styles.buttonContent}
+            labelStyle={styles.buttonLabel}
+            compact
+          >
+            {myDogsLabel}
+          </Button>
+        </View>
+      </Surface>
+    </SafeAreaView>
   );
 }
 
