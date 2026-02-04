@@ -158,13 +158,13 @@ export default function NewDogScreen() {
 
   const handleTakePhoto = async () => {
     const eventPrefix = isEditMode ? 'EditDog:camera' : 'New Dog - Take photo';
-    logEvent(`${eventPrefix}:press`);
+    logEvent(isEditMode ? `${eventPrefix}:press` : 'New Dog - Take photo initiated');
     try {
       // Request camera permissions
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       
       if (status !== 'granted') {
-        logEvent(`${eventPrefix} permission denied`);
+        logEvent(isEditMode ? `${eventPrefix}:permission_denied` : 'New Dog - Camera permission denied');
         Alert.alert(
           'Camera Permission Required',
           'Please enable camera permissions in your device settings to take photos of dogs.',
@@ -173,7 +173,7 @@ export default function NewDogScreen() {
         return;
       }
 
-      logEvent(`${eventPrefix} permission granted, launching camera`);
+      logEvent(isEditMode ? `${eventPrefix}:permission_granted` : 'New Dog - Camera permission granted, launching camera');
       
       // Launch camera
       const result = await ImagePicker.launchCameraAsync({
@@ -186,14 +186,15 @@ export default function NewDogScreen() {
         const uri = result.assets[0].uri;
         setPhotoUri(uri);
         const uriLog = uri ? `...${uri.slice(-12)}` : 'none';
-        logEvent(`${eventPrefix}:success`, { uriPreview: uriLog });
+        logEvent(isEditMode ? `${eventPrefix}:success` : 'New Dog - Photo captured successfully', 
+          isEditMode ? { uriPreview: uriLog } : undefined);
       } else {
-        logEvent(`${eventPrefix}:cancel`);
+        logEvent(isEditMode ? `${eventPrefix}:cancel` : 'New Dog - Photo capture cancelled');
       }
     } catch (error) {
       logError(
         error instanceof Error ? error : new Error(String(error)), 
-        { context: `${eventPrefix}:error` }
+        { context: isEditMode ? `${eventPrefix}:error` : 'New Dog - Photo capture failed' }
       );
       Alert.alert('Error', 'Failed to take photo. Please try again.');
     }
@@ -232,7 +233,7 @@ export default function NewDogScreen() {
           // Preserve original timestamps
           metAt: existingDog.metAt,
           createdAt: existingDog.createdAt,
-          // updatedAt is set by updateDog function
+          // Set updatedAt (will be overwritten by updateDog function)
           updatedAt: new Date().toISOString(),
         };
 
