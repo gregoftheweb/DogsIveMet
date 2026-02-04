@@ -15,13 +15,14 @@ import { Ionicons } from '@expo/vector-icons';
 import {
   TextInput,
   Button,
-  Card,
   IconButton,
   ActivityIndicator,
   Dialog,
   List,
   Portal,
   useTheme,
+  Surface,
+  Text as PaperText,
 } from 'react-native-paper';
 import { Dog } from '@/src/types/Dog';
 import { addDog, getDogById, updateDog } from '@/src/storage/dogs';
@@ -458,40 +459,42 @@ export default function NewDogScreen() {
           />
         </View>
 
-        {/* Photo Preview and Camera Button */}
+        {/* Photo Section - Conditional Rendering */}
         <View style={styles.inputContainer}>
-          <Card style={styles.photoCard}>
-            <View style={styles.photoPreview}>
-              {photoUri ? (
-                <Image source={{ uri: photoUri }} style={styles.photoImage} />
-              ) : (
-                <View style={styles.photoPlaceholder}>
-                  <Ionicons
-                    name="camera-outline"
-                    size={48}
-                    color={theme.colors.onSurfaceVariant}
-                  />
-                  <Text
-                    style={[
-                      styles.photoPlaceholderText,
-                      { color: theme.colors.onSurfaceVariant },
-                    ]}
-                  >
-                    No photo yet
-                  </Text>
-                </View>
-              )}
-            </View>
-            <Card.Actions style={styles.photoActions}>
+          {!photoUri ? (
+            // Before photo: Show compact Take Photo button
+            <>
               <Button
-                icon="camera"
                 mode="contained"
+                icon="camera"
                 onPress={handleTakePhoto}
+                style={styles.takePhotoButton}
               >
                 Take Photo
               </Button>
-            </Card.Actions>
-          </Card>
+              <PaperText
+                variant="bodySmall"
+                style={[styles.helperText, { color: theme.colors.onSurfaceVariant }]}
+              >
+                Add a photo to help remember this dog.
+              </PaperText>
+            </>
+          ) : (
+            // After photo: Show image preview + retake button
+            <>
+              <Surface style={styles.imageContainer} elevation={0}>
+                <Image source={{ uri: photoUri }} style={styles.photoImage} />
+              </Surface>
+              <Button
+                mode="outlined"
+                icon="camera-reverse"
+                onPress={handleTakePhoto}
+                style={styles.retakeButton}
+              >
+                Retake Photo
+              </Button>
+            </>
+          )}
         </View>
 
         {/* Breed Picker */}
@@ -621,30 +624,28 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
   },
-  photoCard: {
-    overflow: 'hidden',
-  },
-  photoPreview: {
+  takePhotoButton: {
     width: '100%',
-    aspectRatio: 1,
+  },
+  helperText: {
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  imageContainer: {
+    width: '100%',
+    maxWidth: 320,
+    alignSelf: 'center',
+    borderRadius: 16,
     overflow: 'hidden',
+    aspectRatio: 1,
   },
   photoImage: {
     width: '100%',
     height: '100%',
   },
-  photoPlaceholder: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-  },
-  photoPlaceholderText: {
-    marginTop: 8,
-    fontSize: 14,
-  },
-  photoActions: {
-    padding: 8,
+  retakeButton: {
+    marginTop: 12,
+    alignSelf: 'center',
   },
   breedButton: {
     justifyContent: 'center',
