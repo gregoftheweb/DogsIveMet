@@ -482,7 +482,7 @@ export default function NewDogScreen() {
           ) : (
             // After photo: Show image preview + retake button
             <>
-              <Surface style={styles.imageContainer} elevation={0}>
+              <Surface style={styles.imageContainer}>
                 <Image source={{ uri: photoUri }} style={styles.photoImage} />
               </Surface>
               <Button
