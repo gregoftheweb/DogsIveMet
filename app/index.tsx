@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Text, Image, Pressable, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
+import { logEvent } from '@/src/utils/logger';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -44,7 +45,10 @@ export default function HomeScreen() {
             styles.button,
             pressed && styles.buttonPressed,
           ]}
-          onPress={() => router.push('/my-dog')}
+          onPress={() => {
+            logEvent('Nav:to:MyDogs');
+            router.push('/my-dogs-list');
+          }}
         >
           <Text style={styles.buttonText}>My Dog</Text>
         </Pressable>

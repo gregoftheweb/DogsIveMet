@@ -91,3 +91,24 @@ export async function deleteDog(id: string): Promise<void> {
     throw error;
   }
 }
+
+// My Dogs helpers
+export async function getMyDogs(): Promise<Dog[]> {
+  try {
+    const dogs = await getDogs();
+    return dogs.filter(dog => dog.isMine === true);
+  } catch (error) {
+    console.error('Error loading my dogs from storage:', error);
+    return [];
+  }
+}
+
+export async function getMetDogs(): Promise<Dog[]> {
+  try {
+    const dogs = await getDogs();
+    return dogs.filter(dog => !dog.isMine);
+  } catch (error) {
+    console.error('Error loading met dogs from storage:', error);
+    return [];
+  }
+}
