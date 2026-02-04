@@ -1,59 +1,84 @@
 import React from 'react';
-import { StyleSheet, View, Text, Pressable } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Button, Text, useTheme, SegmentedButtons } from 'react-native-paper';
+import { ScreenContainer } from '@/src/ui/ScreenContainer';
+import { useThemeMode } from '@/src/theme/ThemeProvider';
 
 export default function MeScreen() {
   const router = useRouter();
+  const theme = useTheme();
+  const { themeMode, setThemeMode } = useThemeMode();
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Me Screen</Text>
+    <ScreenContainer>
+      <View style={styles.container}>
+        <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.onBackground }]}>
+          Me Screen
+        </Text>
 
-      <Pressable
-        style={({ pressed }) => [
-          styles.button,
-          pressed && styles.buttonPressed,
-        ]}
-        onPress={() => router.back()}
-      >
-        <Text style={styles.buttonText}>Back to Home</Text>
-      </Pressable>
-    </View>
+        {/* Theme Toggle Demo */}
+        <View style={styles.themeSection}>
+          <Text variant="titleMedium" style={[styles.sectionTitle, { color: theme.colors.onBackground }]}>
+            Theme Mode
+          </Text>
+          <SegmentedButtons
+            value={themeMode}
+            onValueChange={(value) => setThemeMode(value as 'system' | 'light' | 'dark')}
+            buttons={[
+              { value: 'system', label: 'System' },
+              { value: 'light', label: 'Light' },
+              { value: 'dark', label: 'Dark' },
+            ]}
+            style={styles.segmentedButtons}
+          />
+          <Text 
+            variant="bodySmall" 
+            style={[styles.themeHint, { color: theme.colors.onSurfaceVariant }]}
+          >
+            This demonstrates the theme infrastructure. A Settings screen would contain this toggle in the final app.
+          </Text>
+        </View>
+
+        <Button
+          mode="contained"
+          onPress={() => router.back()}
+          style={styles.button}
+        >
+          Back to Home
+        </Button>
+      </View>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
   },
   title: {
-    fontSize: 28,
+    marginBottom: 32,
     fontWeight: 'bold',
-    marginBottom: 40,
-    color: '#333',
+  },
+  themeSection: {
+    width: '100%',
+    marginBottom: 32,
+  },
+  sectionTitle: {
+    marginBottom: 12,
+    fontWeight: '600',
+  },
+  segmentedButtons: {
+    marginBottom: 12,
+  },
+  themeHint: {
+    textAlign: 'center',
+    marginTop: 8,
   },
   button: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 14,
-    paddingHorizontal: 28,
     borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  buttonPressed: {
-    backgroundColor: '#0051D5',
-    transform: [{ scale: 0.98 }],
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
   },
 });

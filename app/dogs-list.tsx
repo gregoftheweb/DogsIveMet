@@ -2,9 +2,6 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
-  TextInput,
-  Pressable,
   FlatList,
   RefreshControl,
   Modal,
@@ -13,6 +10,20 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
+import {
+  Searchbar,
+  Button,
+  Card,
+  List,
+  IconButton,
+  ActivityIndicator,
+  Appbar,
+  useTheme,
+  Snackbar,
+  Text,
+  Paragraph,
+  Surface,
+} from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { Dog } from '@/src/types/Dog';
 import { getMetDogs, deleteDog } from '@/src/storage/dogs';
@@ -22,11 +33,12 @@ type SortOption = 'newest' | 'oldest';
 
 interface PendingDelete {
   dog: Dog;
-  timer: NodeJS.Timeout;
+  timer: ReturnType<typeof setTimeout>;
 }
 
 export default function DogsListScreen() {
   const router = useRouter();
+  const theme = useTheme();
   
   // State
   const [allDogs, setAllDogs] = useState<Dog[]>([]);
@@ -263,63 +275,55 @@ export default function DogsListScreen() {
     });
   };
 
-  // Render dog row
+  // Render dog row using Paper List.Item
   const renderDogRow = ({ item }: { item: Dog }) => (
-    <Pressable
-      style={({ pressed }) => [
-        styles.dogRow,
-        pressed && styles.dogRowPressed,
-      ]}
+    <List.Item
+      title={item.name}
+      description={`${item.breed} • ${formatDate(item.metAt)}`}
+      left={(props) => <List.Icon {...props} icon="paw" />}
+      right={(props) => <List.Icon {...props} icon="chevron-right" />}
       onPress={() => handleDogPress(item.id)}
       onLongPress={() => handleDeletePress(item)}
       delayLongPress={500}
-    >
-      <View style={styles.dogRowContent}>
-        <Text style={styles.dogName}>{item.name}</Text>
-        <Text style={styles.dogBreed}>{item.breed}</Text>
-        <Text style={styles.dogDate}>{formatDate(item.metAt)}</Text>
-      </View>
-      <Ionicons name="chevron-forward" size={20} color="#999" />
-    </Pressable>
+      style={[styles.dogRow, { backgroundColor: theme.colors.surface }]}
+      titleStyle={styles.dogRowTitle}
+      descriptionStyle={styles.dogRowDescription}
+    />
   );
 
   // Empty state - no dogs saved
   if (allDogs.length === 0) {
     return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Pressable onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#007AFF" />
-          </Pressable>
-          <Text style={styles.headerTitle}>Dogs I've Met</Text>
-          <View style={styles.headerSpacer} />
-        </View>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <Appbar.Header>
+          <Appbar.BackAction onPress={() => router.back()} />
+          <Appbar.Content title="Dogs I've Met" />
+        </Appbar.Header>
 
         <View style={styles.emptyContainer}>
-          <Ionicons name="paw-outline" size={64} color="#ccc" />
-          <Text style={styles.emptyTitle}>No dogs saved yet.</Text>
-          <Pressable
-            style={({ pressed }) => [
-              styles.emptyButton,
-              pressed && styles.emptyButtonPressed,
-            ]}
+          <Ionicons name="paw-outline" size={64} color={theme.colors.outlineVariant} />
+          <Paragraph style={[styles.emptyTitle, { color: theme.colors.onSurfaceVariant }]}>
+            No dogs saved yet.
+          </Paragraph>
+          <Button
+            mode="contained"
             onPress={handleAddFirstDog}
+            style={styles.emptyButton}
+            icon="plus"
           >
-            <Text style={styles.emptyButtonText}>Add your first dog</Text>
-          </Pressable>
+            Add your first dog
+          </Button>
         </View>
 
-        <View style={styles.footer}>
-          <Pressable
-            style={({ pressed }) => [
-              styles.homeButton,
-              pressed && styles.homeButtonPressed,
-            ]}
+        <View style={[styles.footer, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.outlineVariant }]}>
+          <Button
+            mode="contained"
             onPress={handleHomePress}
+            style={styles.homeButton}
+            icon="home"
           >
-            <Ionicons name="home" size={20} color="#fff" />
-            <Text style={styles.homeButtonText}>Home</Text>
-          </Pressable>
+            Home
+          </Button>
         </View>
       </View>
     );
@@ -329,84 +333,67 @@ export default function DogsListScreen() {
   const showNoResults = filteredDogs.length === 0;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
-        <Pressable 
-          onPress={() => router.back()} 
-          style={styles.backButton}
-          accessibilityLabel="Go back"
-          accessibilityRole="button"
-        >
-          <Ionicons name="arrow-back" size={24} color="#007AFF" />
-        </Pressable>
-        <Text style={styles.headerTitle}>Dogs I've Met</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      <Appbar.Header>
+        <Appbar.BackAction onPress={() => router.back()} />
+        <Appbar.Content title="Dogs I've Met" />
+      </Appbar.Header>
 
       {/* Controls */}
-      <View style={styles.controls}>
+      <Surface style={[styles.controls, { backgroundColor: theme.colors.surface }]}>
         {/* Search Input */}
-        <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search by name"
-            value={searchQuery}
-            onChangeText={handleSearchChange}
-            autoCapitalize="words"
-            accessibilityLabel="Search dogs by name"
-            accessibilityHint="Enter a dog's name to filter the list"
-          />
-          {searchQuery.length > 0 && (
-            <Pressable onPress={() => setSearchQuery('')} style={styles.clearButton}>
-              <Ionicons name="close-circle" size={20} color="#999" />
-            </Pressable>
-          )}
-        </View>
+        <Searchbar
+          placeholder="Search by name"
+          value={searchQuery}
+          onChangeText={handleSearchChange}
+          style={[styles.searchbar, { backgroundColor: theme.colors.surfaceVariant }]}
+          iconColor={theme.colors.onSurfaceVariant}
+          placeholderTextColor={theme.colors.onSurfaceVariant}
+          inputStyle={{ color: theme.colors.onSurface }}
+          accessibilityLabel="Search dogs by name"
+          accessibilityHint="Enter a dog's name to filter the list"
+        />
 
         {/* Breed Filter and Sort */}
         <View style={styles.filterRow}>
-          <Pressable
-            style={styles.filterButton}
+          <Button
+            mode="outlined"
             onPress={() => setBreedModalVisible(true)}
+            style={styles.filterButton}
+            labelStyle={styles.filterButtonLabel}
+            icon="filter-variant"
           >
-            <Text style={styles.filterButtonText} numberOfLines={1}>
-              {selectedBreed}
-            </Text>
-            <Ionicons name="chevron-down" size={16} color="#666" />
-          </Pressable>
+            {selectedBreed}
+          </Button>
 
-          <Pressable
-            style={styles.sortButton}
+          <Button
+            mode="outlined"
             onPress={handleSortToggle}
+            style={styles.sortButton}
+            labelStyle={styles.filterButtonLabel}
+            icon={sortOption === 'newest' ? 'arrow-down' : 'arrow-up'}
           >
-            <Ionicons 
-              name={sortOption === 'newest' ? 'arrow-down' : 'arrow-up'} 
-              size={16} 
-              color="#666" 
-            />
-            <Text style={styles.sortButtonText}>
-              {sortOption === 'newest' ? 'Newest' : 'Oldest'}
-            </Text>
-          </Pressable>
+            {sortOption === 'newest' ? 'Newest' : 'Oldest'}
+          </Button>
         </View>
-      </View>
+      </Surface>
 
       {/* List or No Results */}
       {showNoResults ? (
         <View style={styles.noResultsContainer}>
-          <Ionicons name="search-outline" size={48} color="#ccc" />
-          <Text style={styles.noResultsText}>No matches found.</Text>
-          <Pressable
-            style={({ pressed }) => [
-              styles.clearFiltersButton,
-              pressed && styles.clearFiltersButtonPressed,
-            ]}
+          <Ionicons name="search-outline" size={48} color={theme.colors.outlineVariant} />
+          <Paragraph style={[styles.noResultsText, { color: theme.colors.onSurfaceVariant }]}>
+            No matches found.
+          </Paragraph>
+          <Button
+            mode="contained"
             onPress={handleClearFilters}
+            style={styles.clearFiltersButton}
+            icon="refresh"
           >
-            <Text style={styles.clearFiltersButtonText}>Clear filters</Text>
-          </Pressable>
+            Clear filters
+          </Button>
         </View>
       ) : (
         <FlatList
@@ -416,44 +403,46 @@ export default function DogsListScreen() {
           style={styles.list}
           contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            <RefreshControl 
+              refreshing={refreshing} 
+              onRefresh={onRefresh}
+              tintColor={theme.colors.primary}
+            />
           }
         />
       )}
 
-      {/* Undo Banner */}
-      {pendingDelete && (
-        <View style={styles.undoBanner}>
-          <View style={styles.undoBannerContent}>
-            <Ionicons name="trash-outline" size={18} color="#fff" />
-            <Text style={styles.undoBannerText}>
-              Deleted "{pendingDelete.dog.name}"
-            </Text>
-          </View>
-          <Pressable
-            style={({ pressed }) => [
-              styles.undoButton,
-              pressed && styles.undoButtonPressed,
-            ]}
-            onPress={handleUndo}
-          >
-            <Text style={styles.undoButtonText}>Undo</Text>
-          </Pressable>
-        </View>
-      )}
+      {/* Undo Snackbar */}
+      <Snackbar
+        visible={!!pendingDelete}
+        onDismiss={() => {
+          // Simply hide the snackbar when swiped away
+          // The timer in handleDeletePress will still auto-commit the delete
+        }}
+        duration={5000}
+        action={{
+          label: 'Undo',
+          onPress: handleUndo,
+          labelStyle: styles.undoActionLabel,
+        }}
+        style={styles.snackbar}
+        wrapperStyle={styles.snackbarWrapper}
+      >
+        <Text style={styles.snackbarText}>
+          {pendingDelete && `Deleted "${pendingDelete.dog.name}"`}
+        </Text>
+      </Snackbar>
 
       {/* Footer */}
-      <View style={styles.footer}>
-        <Pressable
-          style={({ pressed }) => [
-            styles.homeButton,
-            pressed && styles.homeButtonPressed,
-          ]}
+      <View style={[styles.footer, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.outlineVariant }]}>
+        <Button
+          mode="contained"
           onPress={handleHomePress}
+          style={styles.homeButton}
+          icon="home"
         >
-          <Ionicons name="home" size={20} color="#fff" />
-          <Text style={styles.homeButtonText}>Home</Text>
-        </Pressable>
+          Home
+        </Button>
       </View>
 
       {/* Breed Filter Modal */}
@@ -463,42 +452,48 @@ export default function DogsListScreen() {
         animationType="slide"
         onRequestClose={() => setBreedModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Filter by Breed</Text>
-              <Pressable 
+        <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: theme.colors.outlineVariant }]}>
+              <Text style={[styles.modalTitle, { color: theme.colors.onSurface }]}>
+                Filter by Breed
+              </Text>
+              <IconButton
+                icon="close"
                 onPress={() => setBreedModalVisible(false)}
                 accessibilityLabel="Close breed filter"
-                accessibilityRole="button"
-              >
-                <Ionicons name="close" size={28} color="#333" />
-              </Pressable>
+              />
             </View>
             <ScrollView style={styles.modalScroll}>
-              {availableBreeds.map((breed) => (
-                <Pressable
-                  key={breed}
-                  style={({ pressed }) => [
-                    styles.breedOption,
-                    selectedBreed === breed && styles.breedOptionSelected,
-                    pressed && styles.breedOptionPressed,
-                  ]}
-                  onPress={() => handleBreedSelect(breed)}
-                >
-                  <Text
+              {availableBreeds.map((breed) => {
+                const isSelected = selectedBreed === breed;
+                return (
+                  <List.Item
+                    key={breed}
+                    title={breed}
+                    onPress={() => handleBreedSelect(breed)}
                     style={[
-                      styles.breedOptionText,
-                      selectedBreed === breed && styles.breedOptionTextSelected,
+                      styles.breedOption,
+                      isSelected && styles.breedOptionSelected,
+                      isSelected && { backgroundColor: theme.colors.primaryContainer },
                     ]}
-                  >
-                    {breed}
-                  </Text>
-                  {selectedBreed === breed && (
-                    <Ionicons name="checkmark" size={24} color="#007AFF" />
-                  )}
-                </Pressable>
-              ))}
+                    titleStyle={[
+                      styles.breedOptionText,
+                      isSelected && styles.breedOptionTextSelected,
+                      isSelected && { color: theme.colors.primary },
+                    ]}
+                    right={(props) =>
+                      isSelected ? (
+                        <List.Icon
+                          {...props}
+                          icon="check"
+                          color={theme.colors.primary}
+                        />
+                      ) : null
+                    }
+                  />
+                );
+              })}
             </ScrollView>
           </View>
         </View>
@@ -510,53 +505,15 @@ export default function DogsListScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  backButton: {
-    padding: 4,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  headerSpacer: {
-    width: 32,
   },
   controls: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 12,
     gap: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
+  searchbar: {
     borderRadius: 8,
-    paddingHorizontal: 12,
-    backgroundColor: '#f9f9f9',
-  },
-  searchIcon: {
-    marginRight: 8,
-  },
-  searchInput: {
-    flex: 1,
-    paddingVertical: 10,
-    fontSize: 16,
-  },
-  clearButton: {
-    padding: 4,
   },
   filterRow: {
     flexDirection: 'row',
@@ -564,36 +521,14 @@ const styles = StyleSheet.create({
   },
   filterButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    backgroundColor: '#fff',
   },
-  filterButtonText: {
-    fontSize: 15,
-    color: '#333',
-    flex: 1,
-    marginRight: 4,
+  filterButtonLabel: {
+    fontSize: 14,
   },
   sortButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    borderWidth: 1,
-    borderColor: '#ddd',
+    minWidth: '30%',
     borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    backgroundColor: '#fff',
-  },
-  sortButtonText: {
-    fontSize: 15,
-    color: '#333',
   },
   list: {
     flex: 1,
@@ -602,36 +537,16 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   dogRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    backgroundColor: '#fff',
   },
-  dogRowPressed: {
-    backgroundColor: '#f5f5f5',
-  },
-  dogRowContent: {
-    flex: 1,
-    marginRight: 12,
-  },
-  dogName: {
-    fontSize: 18,
+  dogRowTitle: {
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+    fontSize: 16,
   },
-  dogBreed: {
-    fontSize: 15,
-    color: '#666',
-    marginBottom: 2,
-  },
-  dogDate: {
+  dogRowDescription: {
     fontSize: 14,
-    color: '#999',
   },
   emptyContainer: {
     flex: 1,
@@ -640,25 +555,13 @@ const styles = StyleSheet.create({
     padding: 40,
   },
   emptyTitle: {
-    fontSize: 20,
-    color: '#666',
+    fontSize: 18,
     marginTop: 16,
     marginBottom: 24,
   },
   emptyButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 14,
-    paddingHorizontal: 28,
-    borderRadius: 10,
-  },
-  emptyButtonPressed: {
-    backgroundColor: '#0051D5',
-    transform: [{ scale: 0.98 }],
-  },
-  emptyButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    marginTop: 16,
+    borderRadius: 8,
   },
   noResultsContainer: {
     flex: 1,
@@ -667,57 +570,26 @@ const styles = StyleSheet.create({
     padding: 40,
   },
   noResultsText: {
-    fontSize: 18,
-    color: '#666',
+    fontSize: 16,
     marginTop: 16,
     marginBottom: 24,
   },
   clearFiltersButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+    marginTop: 16,
     borderRadius: 8,
-  },
-  clearFiltersButtonPressed: {
-    backgroundColor: '#0051D5',
-    transform: [{ scale: 0.98 }],
-  },
-  clearFiltersButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
   },
   footer: {
     borderTopWidth: 1,
-    borderTopColor: '#eee',
     padding: 16,
-    backgroundColor: '#fff',
   },
   homeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#007AFF',
-    paddingVertical: 14,
-    borderRadius: 10,
-    gap: 8,
-  },
-  homeButtonPressed: {
-    backgroundColor: '#0051D5',
-    transform: [{ scale: 0.98 }],
-  },
-  homeButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    borderRadius: 8,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '70%',
@@ -726,74 +598,44 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: 18,
+    fontWeight: '600',
   },
   modalScroll: {
     maxHeight: 400,
   },
   breedOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   breedOptionSelected: {
-    backgroundColor: '#f0f7ff',
-  },
-  breedOptionPressed: {
-    backgroundColor: '#e8f4ff',
+    borderRadius: 4,
   },
   breedOptionText: {
     fontSize: 16,
-    color: '#333',
   },
   breedOptionTextSelected: {
     fontWeight: '600',
-    color: '#007AFF',
   },
-  undoBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#333',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#444',
+  snackbar: {
+    margin: 16,
+    borderRadius: 8,
   },
-  undoBannerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    flex: 1,
+  snackbarWrapper: {
+    marginHorizontal: 0,
+    marginBottom: 0,
   },
-  undoBannerText: {
-    color: '#fff',
-    fontSize: 15,
-    flex: 1,
+  snackbarText: {
+    fontSize: 14,
+    marginRight: 8,
   },
-  undoButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 6,
-  },
-  undoButtonPressed: {
-    backgroundColor: '#0051D5',
-    transform: [{ scale: 0.96 }],
-  },
-  undoButtonText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '600',
+  undoActionLabel: {
+    fontSize: 14,
   },
 });

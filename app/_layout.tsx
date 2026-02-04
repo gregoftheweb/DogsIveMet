@@ -1,12 +1,15 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
+import { PaperProvider, configureFonts } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { useColorScheme } from '@/components/useColorScheme';
+import { ThemeProvider, useThemeMode } from '@/src/theme/ThemeProvider';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -42,22 +45,35 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+    <ThemeProvider>
+      <RootLayoutNav />
+    </ThemeProvider>
+  );
 }
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const { activeTheme } = useThemeMode();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="new-dog" options={{ title: 'New Dog' }} />
-        <Stack.Screen name="dogs-list" options={{ title: 'List of Dogs' }} />
-        <Stack.Screen name="dog-profile" options={{ title: 'Dog Profile' }} />
-        <Stack.Screen name="my-dog" options={{ title: 'My Dog' }} />
-        <Stack.Screen name="me" options={{ title: 'Me' }} />
-      </Stack>
-    </ThemeProvider>
+    <PaperProvider 
+      theme={activeTheme}
+      settings={{
+        icon: (props) => <MaterialCommunityIcons {...props} />,
+      }}
+    >
+      <NavigationThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="new-dog" options={{ title: 'New Dog' }} />
+          <Stack.Screen name="dogs-list" options={{ title: 'List of Dogs' }} />
+          <Stack.Screen name="dog-profile" options={{ title: 'Dog Profile' }} />
+          <Stack.Screen name="my-dog" options={{ title: 'My Dog' }} />
+          <Stack.Screen name="me" options={{ title: 'Me' }} />
+          <Stack.Screen name="my-dogs-list" options={{ title: 'My Dogs' }} />
+        </Stack>
+      </NavigationThemeProvider>
+    </PaperProvider>
   );
 }

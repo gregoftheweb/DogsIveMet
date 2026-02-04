@@ -2,19 +2,27 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
-  Pressable,
-  ScrollView,
   Image,
-  ActivityIndicator,
   Alert,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
+import {
+  Card,
+  Button,
+  IconButton,
+  ActivityIndicator,
+  Appbar,
+  List,
+  useTheme,
+  Text,
+  Surface,
+} from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { Dog } from '@/src/types/Dog';
 import { getDogById, deleteDog } from '@/src/storage/dogs';
 import { logEvent, logError } from '@/src/utils/logger';
+import { ScreenContainer } from '@/src/ui/ScreenContainer';
 
 // Format date/time for display
 function formatDateTime(isoDate: string): string {
@@ -33,6 +41,7 @@ export default function DogProfileScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { id } = params;
+  const theme = useTheme();
 
   const [loading, setLoading] = useState(true);
   const [dog, setDog] = useState<Dog | null>(null);
@@ -147,267 +156,172 @@ export default function DogProfileScreen() {
   // Loading state
   if (loading) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
+      <ScreenContainer>
+        <View style={styles.centerContent}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={[styles.loadingText, { color: theme.colors.onBackground }]} variant="bodyLarge">
+            Loading...
+          </Text>
+        </View>
+      </ScreenContainer>
     );
   }
 
   // Not found state
   if (notFound || !dog) {
     return (
-      <View style={styles.centerContainer}>
-        <Ionicons name="paw-outline" size={64} color="#ccc" />
-        <Text style={styles.notFoundText}>Dog not found.</Text>
-        <Pressable
-          style={({ pressed }) => [
-            styles.backButton,
-            pressed && styles.backButtonPressed,
-          ]}
-          onPress={handleBackToList}
-        >
-          <Text style={styles.backButtonText}>Back to list</Text>
-        </Pressable>
-      </View>
+      <ScreenContainer>
+        <View style={styles.centerContent}>
+          <Ionicons name="paw-outline" size={64} color={theme.colors.outlineVariant} />
+          <Text style={[styles.notFoundText, { color: theme.colors.onBackground }]} variant="headlineSmall">
+            Dog not found.
+          </Text>
+          <Button
+            mode="contained"
+            onPress={handleBackToList}
+            style={styles.notFoundButton}
+          >
+            Back to list
+          </Button>
+        </View>
+      </ScreenContainer>
     );
   }
 
   // Main profile UI
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable
-          onPress={handleBackToList}
-          style={styles.headerBackButton}
-          accessibilityLabel="Go back"
-          accessibilityRole="button"
-        >
-          <Ionicons name="arrow-back" size={24} color="#007AFF" />
-        </Pressable>
-        <Text style={styles.headerTitle}>Dog Profile</Text>
-        <Pressable
-          onPress={handleEdit}
-          style={styles.headerEditButton}
-          accessibilityLabel="Edit dog"
-          accessibilityRole="button"
-        >
-          <Text style={styles.headerEditText}>Edit</Text>
-        </Pressable>
-      </View>
+    <ScreenContainer scroll>
+      {/* Header with Appbar */}
+      <Appbar.Header style={{ backgroundColor: theme.colors.surface }}>
+        <Appbar.BackAction onPress={handleBackToList} />
+        <Appbar.Content title="Dog Profile" />
+        <Appbar.Action icon="pencil" onPress={handleEdit} />
+      </Appbar.Header>
 
-      {/* Content */}
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-      >
-        <View style={styles.contentContainer}>
-          {/* Name */}
-          <Text style={styles.dogName}>{dog.name}</Text>
+      <View style={styles.contentWrapper}>
+        {/* Dog Name */}
+        <Text variant="displaySmall" style={[styles.dogName, { color: theme.colors.onBackground }]}>
+          {dog.name}
+        </Text>
 
-          {/* Photo */}
-          <View style={styles.photoContainer}>
-            {dog.photoUri ? (
+        {/* Photo Card */}
+        <Card style={styles.photoCard}>
+          {dog.photoUri ? (
+            <View style={styles.photoImageContainer}>
               <Image
                 source={{ uri: dog.photoUri }}
-                style={styles.photo}
+                style={styles.photoImage}
                 resizeMode="cover"
               />
-            ) : (
-              <View style={styles.photoPlaceholder}>
-                <Ionicons name="image-outline" size={48} color="#ccc" />
-                <Text style={styles.photoPlaceholderText}>No photo</Text>
-              </View>
-            )}
-          </View>
-
-          {/* Details */}
-          <View style={styles.detailsSection}>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Breed:</Text>
-              <Text style={styles.detailValue}>{dog.breed}</Text>
             </View>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Met:</Text>
-              <Text style={styles.detailValue}>{formatDateTime(dog.metAt)}</Text>
-            </View>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Where we met:</Text>
-              <Text style={styles.detailValue}>
-                {dog.metLocationText || '(none)'}
+          ) : (
+            <Surface style={[styles.photoPlaceholder, { backgroundColor: theme.colors.surfaceVariant }]}>
+              <Ionicons name="image-outline" size={48} color={theme.colors.outline} />
+              <Text style={[styles.photoPlaceholderText, { color: theme.colors.outline }]} variant="bodyMedium">
+                No photo
               </Text>
-            </View>
+            </Surface>
+          )}
+        </Card>
 
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Notes:</Text>
-              <Text style={styles.detailValue}>
-                {dog.notes || '(none)'}
-              </Text>
-            </View>
-          </View>
+        {/* Details Section */}
+        <List.Section style={styles.detailsSection}>
+          <List.Item
+            title="Breed"
+            description={dog.breed}
+            left={(props) => <List.Icon {...props} icon="dog" />}
+          />
+          <List.Item
+            title="Met"
+            description={formatDateTime(dog.metAt)}
+            left={(props) => <List.Icon {...props} icon="calendar" />}
+          />
+          <List.Item
+            title="Where we met"
+            description={dog.metLocationText || '(none)'}
+            left={(props) => <List.Icon {...props} icon="map-marker" />}
+          />
+          <List.Item
+            title="Notes"
+            description={dog.notes || '(none)'}
+            left={(props) => <List.Icon {...props} icon="note-text" />}
+          />
+        </List.Section>
 
-          {/* Delete button */}
-          <Pressable
-            style={({ pressed }) => [
-              styles.deleteButton,
-              pressed && styles.deleteButtonPressed,
-            ]}
-            onPress={handleDelete}
-          >
-            <Ionicons name="trash-outline" size={20} color="#fff" />
-            <Text style={styles.deleteButtonText}>Delete</Text>
-          </Pressable>
-        </View>
-      </ScrollView>
-    </View>
+        {/* Delete Button */}
+        <Button
+          mode="outlined"
+          textColor={theme.colors.error}
+          icon="trash-can-outline"
+          onPress={handleDelete}
+          style={styles.deleteButton}
+          labelStyle={styles.deleteButtonLabel}
+        >
+          Delete
+        </Button>
+      </View>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  centerContent: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  centerContainer: {
-    flex: 1,
-    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
   },
   loadingText: {
     marginTop: 12,
-    fontSize: 16,
-    color: '#666',
   },
   notFoundText: {
     marginTop: 16,
     marginBottom: 24,
-    fontSize: 18,
-    color: '#666',
     textAlign: 'center',
   },
-  backButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
+  notFoundButton: {
+    minWidth: 150,
   },
-  backButtonPressed: {
-    backgroundColor: '#0051D5',
-    transform: [{ scale: 0.98 }],
-  },
-  backButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    backgroundColor: '#fff',
-  },
-  headerBackButton: {
-    padding: 4,
-    minWidth: 60,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-  },
-  headerEditButton: {
-    padding: 4,
-    minWidth: 60,
-    alignItems: 'flex-end',
-  },
-  headerEditText: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '500',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-  },
-  contentContainer: {
-    maxWidth: 520,
-    width: '100%',
-    alignSelf: 'center',
+  contentWrapper: {
+    paddingVertical: 16,
   },
   dogName: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#333',
     marginBottom: 20,
     textAlign: 'center',
   },
-  photoContainer: {
+  photoCard: {
+    width: '100%',
+    marginBottom: 24,
+    overflow: 'hidden',
+  },
+  photoImageContainer: {
     width: '100%',
     aspectRatio: 1,
-    marginBottom: 24,
-    borderRadius: 12,
     overflow: 'hidden',
-    backgroundColor: '#f5f5f5',
   },
-  photo: {
+  photoImage: {
     width: '100%',
     height: '100%',
   },
   photoPlaceholder: {
     width: '100%',
     height: '100%',
+    aspectRatio: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f5f5f5',
   },
   photoPlaceholderText: {
     marginTop: 8,
-    fontSize: 16,
-    color: '#999',
   },
   detailsSection: {
     marginBottom: 32,
   },
-  detailRow: {
-    marginBottom: 16,
-  },
-  detailLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
-    marginBottom: 4,
-  },
-  detailValue: {
-    fontSize: 16,
-    color: '#333',
-    lineHeight: 22,
-  },
   deleteButton: {
-    backgroundColor: '#FF3B30',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 14,
+    marginTop: 16,
     borderRadius: 10,
-    gap: 8,
+    borderWidth: 1,
   },
-  deleteButtonPressed: {
-    backgroundColor: '#D32F2F',
-    transform: [{ scale: 0.98 }],
-  },
-  deleteButtonText: {
-    color: '#fff',
+  deleteButtonLabel: {
     fontSize: 16,
     fontWeight: '600',
   },
