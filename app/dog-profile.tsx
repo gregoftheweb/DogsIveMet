@@ -207,11 +207,13 @@ export default function DogProfileScreen() {
         {/* Photo Card */}
         <Card style={styles.photoCard}>
           {dog.photoUri ? (
-            <Card.Cover
-              source={{ uri: dog.photoUri }}
-              resizeMode="cover"
-              style={styles.photoCover}
-            />
+            <View style={styles.photoImageContainer}>
+              <Image
+                source={{ uri: dog.photoUri }}
+                style={styles.photoImage}
+                resizeMode="cover"
+              />
+            </View>
           ) : (
             <Surface style={[styles.photoPlaceholder, { backgroundColor: theme.colors.surfaceVariant }]}>
               <Ionicons name="image-outline" size={48} color={theme.colors.outline} />
@@ -291,10 +293,15 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 24,
     overflow: 'hidden',
-    aspectRatio: 1,
   },
-  photoCover: {
+  photoImageContainer: {
+    width: '100%',
     aspectRatio: 1,
+    overflow: 'hidden',
+  },
+  photoImage: {
+    width: '100%',
+    height: '100%',
   },
   photoPlaceholder: {
     width: '100%',
