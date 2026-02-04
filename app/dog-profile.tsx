@@ -210,6 +210,7 @@ export default function DogProfileScreen() {
             <Card.Cover
               source={{ uri: dog.photoUri }}
               resizeMode="cover"
+              style={styles.photoCover}
             />
           ) : (
             <Surface style={[styles.photoPlaceholder, { backgroundColor: theme.colors.surfaceVariant }]}>
@@ -289,6 +290,9 @@ const styles = StyleSheet.create({
   photoCard: {
     marginBottom: 24,
     overflow: 'hidden',
+    aspectRatio: 1,
+  },
+  photoCover: {
     aspectRatio: 1,
   },
   photoPlaceholder: {
