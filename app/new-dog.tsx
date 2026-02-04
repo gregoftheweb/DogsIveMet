@@ -48,6 +48,7 @@ export default function NewDogScreen() {
   const params = useLocalSearchParams();
   const mode = (params.mode as string) || 'create';
   const dogId = params.id as string | undefined;
+  const isMineParam = params.isMine === 'true';
   const isEditMode = mode === 'edit';
 
   const [loading, setLoading] = useState(isEditMode);
@@ -148,16 +149,22 @@ export default function NewDogScreen() {
   // Log screen mount
   useEffect(() => {
     if (!isEditMode) {
-      logEvent('New Dog - Screen mounted');
+      if (isMineParam) {
+        logEvent('MyDogForm:screen:mount');
+      } else {
+        logEvent('New Dog - Screen mounted');
+      }
     }
     return () => {
       if (isEditMode) {
         logEvent('EditDog:screen:unmount');
+      } else if (isMineParam) {
+        logEvent('MyDogForm:screen:unmount');
       } else {
         logEvent('New Dog - Screen unmounted');
       }
     };
-  }, [isEditMode]);
+  }, [isEditMode, isMineParam]);
 
   const handleTakePhoto = async () => {
     const eventPrefix = isEditMode ? 'EditDog:camera' : 'New Dog - Take photo';
@@ -207,8 +214,20 @@ export default function NewDogScreen() {
   };
 
   const handleSave = async () => {
-    const eventPrefix = isEditMode ? 'EditDog' : 'New Dog';
-    logEvent(`${eventPrefix}:save:press`, { name: name.trim(), breed });
+    // Helper to get the appropriate event prefix based on mode
+    const getEventPrefix = () => {
+      if (isEditMode) return 'EditDog';
+      return isMineParam ? 'MyDogForm' : 'New Dog';
+    };
+
+    const eventPrefix = getEventPrefix();
+    const logMetadata = isMineParam && !isEditMode ? { isMine: true } : {};
+    
+    logEvent(`${eventPrefix}:save:press`, { 
+      name: name.trim(), 
+      breed, 
+      ...logMetadata 
+    });
 
     // Validate required fields
     const trimmedName = name.trim();
@@ -275,19 +294,25 @@ export default function NewDogScreen() {
           metAt: now,
           createdAt: now,
           updatedAt: now,
+          ...(isMineParam ? { isMine: true } : {}),
         };
 
-        logEvent('New Dog - Dog object created', { id, name: trimmedName, breed });
+        logEvent(`${eventPrefix} - Dog object created`, { 
+          id, 
+          name: trimmedName, 
+          breed, 
+          ...logMetadata 
+        });
 
         await addDog(newDog);
-        logEvent('New Dog - Saved to storage successfully', { id });
+        logEvent(`${eventPrefix} - Saved to storage successfully`, { id });
 
         // Show success feedback
         showToast('Dog saved successfully!', 'success');
 
         // Navigate to dog profile
         setTimeout(() => {
-          logEvent('New Dog - Navigating to dog profile', { id });
+          logEvent(`${eventPrefix} - Navigating to dog profile`, { id });
           router.push({
             pathname: '/dog-profile',
             params: { id: newDog.id },

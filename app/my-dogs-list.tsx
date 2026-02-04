@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   StyleSheet,
   View,
@@ -9,27 +9,21 @@ import {
   RefreshControl,
   Modal,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { Dog } from '@/src/types/Dog';
-import { getMetDogs, deleteDog } from '@/src/storage/dogs';
+import { getMyDogs } from '@/src/storage/dogs';
 import { logEvent, logError } from '@/src/utils/logger';
 
 type SortOption = 'newest' | 'oldest';
 
-interface PendingDelete {
-  dog: Dog;
-  timer: NodeJS.Timeout;
-}
-
-export default function DogsListScreen() {
+export default function MyDogsListScreen() {
   const router = useRouter();
   
   // State
-  const [allDogs, setAllDogs] = useState<Dog[]>([]);
+  const [allMyDogs, setAllMyDogs] = useState<Dog[]>([]);
   const [filteredDogs, setFilteredDogs] = useState<Dog[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBreed, setSelectedBreed] = useState('All Breeds');
@@ -37,57 +31,49 @@ export default function DogsListScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [breedModalVisible, setBreedModalVisible] = useState(false);
   const [availableBreeds, setAvailableBreeds] = useState<string[]>(['All Breeds']);
-  
-  // Undo state
-  const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
-  const pendingDeleteRef = useRef<PendingDelete | null>(null);
 
   // Log screen lifecycle
   useEffect(() => {
-    logEvent('DogsList:screen:mount');
+    logEvent('MyDogs:screen:mount');
     return () => {
-      logEvent('DogsList:screen:unmount');
-      // Clean up pending delete timer on unmount
-      if (pendingDeleteRef.current) {
-        clearTimeout(pendingDeleteRef.current.timer);
-      }
+      logEvent('MyDogs:screen:unmount');
     };
   }, []);
 
-  // Load dogs function
-  const loadDogs = useCallback(async () => {
-    logEvent('DogsList:load:on_focus');
+  // Load my dogs function
+  const loadMyDogs = useCallback(async () => {
+    logEvent('MyDogs:load:start');
     try {
-      const dogs = await getMetDogs();
-      setAllDogs(dogs);
+      const myDogs = await getMyDogs();
+      setAllMyDogs(myDogs);
       
       // Extract unique breeds
-      const breeds = Array.from(new Set(dogs.map(dog => dog.breed))).sort();
+      const breeds = Array.from(new Set(myDogs.map(dog => dog.breed))).sort();
       setAvailableBreeds(['All Breeds', ...breeds]);
       
-      logEvent('DogsList:load:success', { count: dogs.length });
+      logEvent('MyDogs:load:success', { count: myDogs.length });
     } catch (error) {
       logError(error instanceof Error ? error : new Error(String(error)), {
-        context: 'DogsList:load:error',
+        context: 'MyDogs:load:error',
       });
     }
   }, []);
 
   // Load on mount
   useEffect(() => {
-    loadDogs();
-  }, [loadDogs]);
+    loadMyDogs();
+  }, [loadMyDogs]);
 
   // Reload on focus
   useFocusEffect(
     useCallback(() => {
-      loadDogs();
-    }, [loadDogs])
+      loadMyDogs();
+    }, [loadMyDogs])
   );
 
   // Filter and sort dogs whenever dependencies change
   useEffect(() => {
-    let result = [...allDogs];
+    let result = [...allMyDogs];
 
     // Apply breed filter
     if (selectedBreed !== 'All Breeds') {
@@ -102,41 +88,41 @@ export default function DogsListScreen() {
       );
     }
 
-    // Sort by date
+    // Sort by date (use createdAt for My Dogs since these are user's own dogs)
     result.sort((a, b) => {
-      const dateA = new Date(a.metAt).getTime();
-      const dateB = new Date(b.metAt).getTime();
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
       return sortOption === 'newest' ? dateB - dateA : dateA - dateB;
     });
 
     setFilteredDogs(result);
-  }, [allDogs, searchQuery, selectedBreed, sortOption]);
+  }, [allMyDogs, searchQuery, selectedBreed, sortOption]);
 
   // Pull to refresh
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadDogs();
+    await loadMyDogs();
     setRefreshing(false);
   };
 
   // Handle search change
   const handleSearchChange = (text: string) => {
     setSearchQuery(text);
-    logEvent('DogsList:search:change', { queryLength: text.length });
+    logEvent('MyDogs:search:change', { queryLength: text.length });
   };
 
   // Handle breed selection
   const handleBreedSelect = (breed: string) => {
     setSelectedBreed(breed);
     setBreedModalVisible(false);
-    logEvent('DogsList:filter:breed', { breed });
+    logEvent('MyDogs:filter:breed', { breed });
   };
 
   // Handle sort toggle
   const handleSortToggle = () => {
     const newSort: SortOption = sortOption === 'newest' ? 'oldest' : 'newest';
     setSortOption(newSort);
-    logEvent('DogsList:sort:change', { sortOption: newSort });
+    logEvent('MyDogs:sort:change', { sortOption: newSort });
   };
 
   // Clear filters
@@ -148,7 +134,7 @@ export default function DogsListScreen() {
 
   // Navigate to dog profile
   const handleDogPress = (id: string) => {
-    logEvent('Nav:to:DogProfile', { id });
+    logEvent('Nav:to:DogProfile', { id, source: 'MyDogs' });
     router.push({
       pathname: '/dog-profile',
       params: { id },
@@ -161,97 +147,14 @@ export default function DogsListScreen() {
     router.push('/');
   };
 
-  // Navigate to new dog
-  const handleAddFirstDog = () => {
-    logEvent('Nav:to:NewDog');
-    router.push('/new-dog');
-  };
-
-  // Commit pending delete to storage
-  const commitDelete = useCallback(async (dog: Dog) => {
-    logEvent('DogsList:delete:commit', { id: dog.id });
-    try {
-      await deleteDog(dog.id);
-      // Reload list from storage to ensure consistency
-      await loadDogs();
-    } catch (error) {
-      logError(error instanceof Error ? error : new Error(String(error)), {
-        context: 'DogsList:delete:error',
-        id: dog.id,
-      });
-      // On error, reload from storage and show alert
-      await loadDogs();
-      Alert.alert(
-        'Delete Failed',
-        'Could not delete the dog. The list has been refreshed.',
-        [{ text: 'OK' }]
-      );
-    }
-  }, [loadDogs]);
-
-  // Handle delete press (with long-press)
-  const handleDeletePress = useCallback((dog: Dog) => {
-    logEvent('DogsList:delete:press', { id: dog.id });
-
-    Alert.alert(
-      'Delete dog?',
-      `Remove "${dog.name}" from your list?`,
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            // If there's already a pending delete, commit it immediately
-            if (pendingDeleteRef.current) {
-              clearTimeout(pendingDeleteRef.current.timer);
-              commitDelete(pendingDeleteRef.current.dog);
-            }
-
-            // Remove from visible list (optimistic UI)
-            setAllDogs(prev => prev.filter(d => d.id !== dog.id));
-
-            // Set up undo timer (5 seconds)
-            const timer = setTimeout(() => {
-              commitDelete(dog);
-              setPendingDelete(null);
-              pendingDeleteRef.current = null;
-            }, 5000);
-
-            const pending = { dog, timer };
-            setPendingDelete(pending);
-            pendingDeleteRef.current = pending;
-          },
-        },
-      ]
-    );
-  }, [commitDelete]);
-
-  // Handle undo
-  const handleUndo = useCallback(() => {
-    if (!pendingDelete) return;
-
-    logEvent('DogsList:delete:undo', { id: pendingDelete.dog.id });
-
-    // Clear the timer
-    clearTimeout(pendingDelete.timer);
-
-    // Restore dog to list
-    setAllDogs(prev => {
-      const exists = prev.find(d => d.id === pendingDelete.dog.id);
-      if (exists) {
-        return prev; // Already in list somehow
-      }
-      return [...prev, pendingDelete.dog];
+  // Navigate to add my dog
+  const handleAddMyDog = () => {
+    logEvent('Nav:to:MyDogForm', { mode: 'create' });
+    router.push({
+      pathname: '/new-dog',
+      params: { mode: 'create', isMine: 'true' },
     });
-
-    // Clear pending delete
-    setPendingDelete(null);
-    pendingDeleteRef.current = null;
-  }, [pendingDelete]);
+  };
 
   // Format date for display
   const formatDate = (isoDate: string): string => {
@@ -271,41 +174,39 @@ export default function DogsListScreen() {
         pressed && styles.dogRowPressed,
       ]}
       onPress={() => handleDogPress(item.id)}
-      onLongPress={() => handleDeletePress(item)}
-      delayLongPress={500}
     >
       <View style={styles.dogRowContent}>
         <Text style={styles.dogName}>{item.name}</Text>
         <Text style={styles.dogBreed}>{item.breed}</Text>
-        <Text style={styles.dogDate}>{formatDate(item.metAt)}</Text>
+        <Text style={styles.dogDate}>{formatDate(item.createdAt)}</Text>
       </View>
       <Ionicons name="chevron-forward" size={20} color="#999" />
     </Pressable>
   );
 
-  // Empty state - no dogs saved
-  if (allDogs.length === 0) {
+  // Empty state - no my dogs saved
+  if (allMyDogs.length === 0) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
           <Pressable onPress={() => router.back()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color="#007AFF" />
           </Pressable>
-          <Text style={styles.headerTitle}>Dogs I've Met</Text>
+          <Text style={styles.headerTitle}>My Dogs</Text>
           <View style={styles.headerSpacer} />
         </View>
 
         <View style={styles.emptyContainer}>
           <Ionicons name="paw-outline" size={64} color="#ccc" />
-          <Text style={styles.emptyTitle}>No dogs saved yet.</Text>
+          <Text style={styles.emptyTitle}>No dogs added yet.</Text>
           <Pressable
             style={({ pressed }) => [
               styles.emptyButton,
               pressed && styles.emptyButtonPressed,
             ]}
-            onPress={handleAddFirstDog}
+            onPress={handleAddMyDog}
           >
-            <Text style={styles.emptyButtonText}>Add your first dog</Text>
+            <Text style={styles.emptyButtonText}>Add My Dog</Text>
           </Pressable>
         </View>
 
@@ -340,7 +241,7 @@ export default function DogsListScreen() {
         >
           <Ionicons name="arrow-back" size={24} color="#007AFF" />
         </Pressable>
-        <Text style={styles.headerTitle}>Dogs I've Met</Text>
+        <Text style={styles.headerTitle}>My Dogs</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -419,27 +320,6 @@ export default function DogsListScreen() {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         />
-      )}
-
-      {/* Undo Banner */}
-      {pendingDelete && (
-        <View style={styles.undoBanner}>
-          <View style={styles.undoBannerContent}>
-            <Ionicons name="trash-outline" size={18} color="#fff" />
-            <Text style={styles.undoBannerText}>
-              Deleted "{pendingDelete.dog.name}"
-            </Text>
-          </View>
-          <Pressable
-            style={({ pressed }) => [
-              styles.undoButton,
-              pressed && styles.undoButtonPressed,
-            ]}
-            onPress={handleUndo}
-          >
-            <Text style={styles.undoButtonText}>Undo</Text>
-          </Pressable>
-        </View>
       )}
 
       {/* Footer */}
@@ -759,41 +639,5 @@ const styles = StyleSheet.create({
   breedOptionTextSelected: {
     fontWeight: '600',
     color: '#007AFF',
-  },
-  undoBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#333',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#444',
-  },
-  undoBannerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    flex: 1,
-  },
-  undoBannerText: {
-    color: '#fff',
-    fontSize: 15,
-    flex: 1,
-  },
-  undoButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 6,
-  },
-  undoButtonPressed: {
-    backgroundColor: '#0051D5',
-    transform: [{ scale: 0.96 }],
-  },
-  undoButtonText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '600',
   },
 });
