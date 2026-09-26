@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Image, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useFocusEffect } from 'expo-router/react-navigation';
-import { Card, Button, ActivityIndicator, List, useTheme, Text, Surface } from 'react-native-paper';
+import { Card, Button, ActivityIndicator, List, useTheme, Text } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { Dog } from '@/src/types/Dog';
 import { getDogById, deleteDog } from '@/src/storage/dogs';
@@ -200,9 +200,9 @@ export default function DogProfileScreen() {
             {dog.name}
           </Text>
 
-          {/* Photo Card */}
-          <Card style={styles.photoCard}>
-            {dog.photoUri ? (
+          {/* Photo */}
+          {dog.photoUri ? (
+            <Card style={styles.photoCard}>
               <View style={styles.photoImageContainer}>
                 <Image
                   source={{ uri: dog.photoUri }}
@@ -210,20 +210,15 @@ export default function DogProfileScreen() {
                   resizeMode="cover"
                 />
               </View>
-            ) : (
-              <Surface
-                style={[styles.photoPlaceholder, { backgroundColor: theme.colors.surfaceVariant }]}
-              >
-                <Ionicons name="image-outline" size={48} color={theme.colors.outline} />
-                <Text
-                  style={[styles.photoPlaceholderText, { color: theme.colors.outline }]}
-                  variant="bodyMedium"
-                >
-                  No photo
-                </Text>
-              </Surface>
-            )}
-          </Card>
+            </Card>
+          ) : (
+            <Text
+              style={[styles.noImageText, { color: theme.colors.outline }]}
+              variant="bodyMedium"
+            >
+              No image saved
+            </Text>
+          )}
 
           {/* Details Section */}
           <List.Section style={styles.detailsSection}>
@@ -321,15 +316,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  photoPlaceholder: {
-    width: '100%',
-    height: '100%',
-    aspectRatio: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  photoPlaceholderText: {
-    marginTop: 8,
+  noImageText: {
+    textAlign: 'center',
+    marginBottom: 24,
   },
   detailsSection: {
     marginBottom: 32,
