@@ -15,7 +15,7 @@ This part is independent of voice and can be done/tested first.
 
 ## 2. Package
 
-**`expo-speech-recognition`** (community package, actively maintained, v57.x matches current Expo SDK 54 line). Already added to `package.json` via `pnpm add expo-speech-recognition`.
+**`expo-speech-recognition`** (community package, actively maintained). Its own version (57.1.0) is independent of the Expo SDK number — its `peerDependencies` list `"expo": "*"`, so it doesn't pin to a specific SDK line. This project is on **Expo SDK 54** (`"expo": "~54.0.33"`); no SDK alignment issue. Already added to `package.json` via `pnpm add expo-speech-recognition`.
 
 Wraps native on-device speech recognition:
 
