@@ -39,14 +39,16 @@ After the plugin is added, native config changes → need a fresh EAS developmen
 
 ## 3. Reusable component: `VoiceInputField`
 
-New file: `src/ui/VoiceInputField.tsx`.
+**Built** — `src/ui/VoiceInputField.tsx`.
 
 Two buttons, one field:
 
 - The `TextInput` is **read-only by default** — tapping directly on the text does nothing, no keyboard pop-up. This keeps the two actions (speak / type) explicit and prevents an accidental keyboard interrupting the voice-first flow.
-- `right` slot holds both buttons side by side (a small `View` with two `IconButton`s, since Paper's `right` prop accepts any component, not just a single `TextInput.Icon`):
-  - **Primary — mic button**: starts/reflects voice capture, as below
-  - **Secondary — keyboard icon button**: tap → flips the field to editable (`editable={true}`) and focuses it (`ref.current?.focus()`) so the native keyboard opens immediately for manual typing. Field goes back to read-only on blur.
+- **Correction from the original plan**: the original design put both icons together in the `right` slot as a custom `View`. That doesn't work — verified from Paper's `TextInputAdornment` source that `right`/`left` only render an element whose type is literally `TextInputIcon` or `TextInputAffix`; anything else (including a plain `View`) is silently dropped and renders nothing. The actual, correct design uses both slots: **keyboard icon on `left`, mic icon on `right`**, each a genuine `TextInput.Icon`. Same two-button function, different concrete layout (icons on opposite ends of the field, not stacked together).
+  - **Keyboard icon (`left`)**: tap → flips the field to editable (`editable={true}`) then focuses it so the native keyboard opens for manual typing. Field goes back to read-only on blur.
+  - **Mic icon (`right`)**: starts/reflects voice capture, as below.
+  - Both icons pass `forceTextInputFocus={false}` — Paper's `TextInput.Icon` focuses the input on press by default, which isn't wanted for the mic icon at all, and fires too early (before `editable` flips) to reliably work for the keyboard icon anyway.
+  - **Focus timing**: calling `.focus()` directly inside the keyboard icon's `onPress` handler (even deferred via `requestAnimationFrame` or `InteractionManager.runAfterInteractions`) races the DOM/native commit of the `editable` change and unreliably loses. The correct fix is a `useEffect` keyed on the field's mode that calls `.focus()` once React has actually committed `editable=true` — deterministic, no arbitrary delay needed.
 
 Mic button design for smoothness (tap → speak → tap, repeatable, no dead air):
 
@@ -66,10 +68,10 @@ Single shared component takes props: `value`, `onChangeText`, `label`, `placehol
 
 ## 4. Integration points
 
-- `app/new-dog.tsx` — field order top to bottom: **Name → Photo → Owner → Breed → Location → Notes → Save/Cancel** (Owner sits right after Photo, ahead of Breed/Location — see §8):
-  - Replace the Name `TextInput` with `VoiceInputField`
-  - Replace the Location `TextInput` with `VoiceInputField`
-  - Add a new Owner `VoiceInputField` (new field, not currently in the form)
+- `app/new-dog.tsx` — field order top to bottom: **Name → Photo → Owner → Breed → Location → Notes → Save/Cancel** (Owner sits right after Photo, ahead of Breed/Location — see §8). **Built**:
+  - Replaced the Name `TextInput` with `VoiceInputField`
+  - Replaced the Location `TextInput` with `VoiceInputField`
+  - Owner uses `VoiceInputField` too (was already a plain `TextInput` from the earlier Owner-field work)
   - Notes field stays **plain text, typing only** — no mic/keyboard dual-button treatment. Confirmed: multiline dictation is a different UX problem and out of scope for this plan.
 - `app/dog-profile.tsx`: display-only, just needs the new Owner `List.Item` (no voice needed here)
 
@@ -88,11 +90,11 @@ Single shared component takes props: `value`, `onChangeText`, `label`, `placehol
 
 ## 7. Suggested order of work
 
-1. Add `ownerName` to type/storage/form/profile (no voice yet) — quick, verifiable in Expo Go today
-2. Add `expo-speech-recognition` config plugin to `app.json`
-3. Kick off an EAS development build (takes a while — start early, do other work while it builds)
-4. Build `VoiceInputField` component against the new build once installed on device
-5. Wire into the three fields, iterate on real-device feel (auto-stop timing, error states)
+1. ✅ Add `ownerName` to type/storage/form/profile (no voice yet)
+2. ✅ Add `expo-speech-recognition` config plugin to `app.json`
+3. ✅ EAS Android development build kicked off and finished (`expo-dev-client` install was a prerequisite, done along the way)
+4. ✅ Built `VoiceInputField` component; verified the read-only/edit/blur cycle and mode exclusivity in-browser (web fallback), but the actual mic/speech-to-text path is unverified — needs the real device with the dev build installed
+5. Wire into the three fields — done as part of step 4. Remaining: install the dev build on a real device, run `expo start --dev-client`, and iterate on real-device feel (auto-stop timing, error states) per §6
 
 ## 8. Square aspect ratio phones
 

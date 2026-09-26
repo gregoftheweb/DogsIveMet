@@ -21,6 +21,7 @@ import { logEvent, logError } from '@/src/utils/logger';
 import { Toast } from '@/components/Toast';
 import { ScreenContainer } from '@/src/ui/ScreenContainer';
 import { TopNav } from '@/src/ui/TopNav';
+import { VoiceInputField } from '@/src/ui/VoiceInputField';
 import { useDogCounts } from '@/src/state/DogCountsProvider';
 
 const BREEDS = [
@@ -454,13 +455,12 @@ export default function NewDogScreen() {
         >
           {/* Name Input */}
           <View style={styles.inputContainer}>
-            <TextInput
+            <VoiceInputField
               label="Name *"
               value={name}
               onChangeText={setName}
-              mode="outlined"
               placeholder="Enter the dog's name"
-              autoCapitalize="words"
+              onError={(message) => showToast(message, 'error')}
             />
           </View>
 
@@ -504,13 +504,12 @@ export default function NewDogScreen() {
 
           {/* Owner Input */}
           <View style={styles.inputContainer}>
-            <TextInput
+            <VoiceInputField
               label="Owner"
               value={ownerName}
               onChangeText={setOwnerName}
-              mode="outlined"
               placeholder="e.g., Jane Smith"
-              autoCapitalize="words"
+              onError={(message) => showToast(message, 'error')}
             />
           </View>
 
@@ -527,13 +526,12 @@ export default function NewDogScreen() {
 
           {/* Location Input */}
           <View style={styles.inputContainer}>
-            <TextInput
+            <VoiceInputField
               label="Where did I meet this dog?"
               value={metLocationText}
               onChangeText={setMetLocationText}
-              mode="outlined"
               placeholder="e.g., Park, Pet Store, Friend's House"
-              autoCapitalize="words"
+              onError={(message) => showToast(message, 'error')}
             />
           </View>
 
