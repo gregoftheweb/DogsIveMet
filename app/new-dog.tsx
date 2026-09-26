@@ -60,7 +60,7 @@ export default function NewDogScreen() {
   const [existingDog, setExistingDog] = useState<Dog | null>(null);
 
   const [name, setName] = useState('');
-  const [breed, setBreed] = useState('Unknown');
+  const [breed, setBreed] = useState('');
   const [photoUri, setPhotoUri] = useState<string | undefined>(undefined);
   const [metLocationText, setMetLocationText] = useState('');
   const [ownerName, setOwnerName] = useState('');
@@ -74,7 +74,7 @@ export default function NewDogScreen() {
   // Track initial values for unsaved changes detection
   const [initialValues, setInitialValues] = useState({
     name: '',
-    breed: 'Unknown',
+    breed: '',
     photoUri: undefined as string | undefined,
     metLocationText: '',
     ownerName: '',
@@ -520,7 +520,7 @@ export default function NewDogScreen() {
               onPress={() => setBreedDialogVisible(true)}
               style={styles.breedButton}
             >
-              {breed} *
+              {breed || 'Choose Breed'} *
             </Button>
           </View>
 
