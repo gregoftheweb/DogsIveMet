@@ -41,6 +41,13 @@
           "photosPermission": "The app accesses your photos to let you add pictures of dogs you've met.",
           "cameraPermission": "The app accesses your camera to let you take pictures of dogs you've met."
         }
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "DogsIveMet uses your microphone so you can dictate fields instead of typing.",
+          "speechRecognitionPermission": "DogsIveMet uses speech recognition to turn what you say into text for the field you're filling in."
+        }
       ]
     ],
     "experiments": {
