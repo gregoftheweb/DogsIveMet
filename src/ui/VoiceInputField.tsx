@@ -16,6 +16,8 @@ const MIC_ICON_SIZE = 34;
 const MIC_BUTTON_PADDING = 8;
 const MIC_BUTTON_DIAMETER = MIC_ICON_SIZE + MIC_BUTTON_PADDING * 2;
 const MIC_BUTTON_COLOR = '#0B3D91';
+// "Mic is live" convention used by video-call apps (Zoom, Meet, Discord).
+const MIC_BUTTON_LISTENING_COLOR = '#00C853';
 
 function formatTranscript(transcript: string): string {
   return transcript
@@ -162,7 +164,7 @@ export function VoiceInputField({
       <IconButton
         icon={mode === 'listening' ? 'microphone' : 'microphone-outline'}
         mode="contained"
-        containerColor={MIC_BUTTON_COLOR}
+        containerColor={mode === 'listening' ? MIC_BUTTON_LISTENING_COLOR : MIC_BUTTON_COLOR}
         iconColor="#fff"
         size={MIC_ICON_SIZE}
         onPress={handleMicPress}
