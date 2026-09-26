@@ -66,7 +66,10 @@ function RootLayoutNav() {
         icon: (props) => <MaterialCommunityIcons {...props} />,
       }}
     >
-      <NavigationThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      {/* Cast needed: @react-navigation/native and expo-router/react-navigation both
+          augment the global ReactNavigation.Theme type with incompatible colors.primary
+          types (string vs ColorValue); both are valid Theme shapes at runtime. */}
+      <NavigationThemeProvider value={(colorScheme === 'dark' ? DarkTheme : DefaultTheme) as any}>
         <Stack>
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="new-dog" options={{ headerShown: false }} />
