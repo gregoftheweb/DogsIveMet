@@ -1,30 +1,29 @@
-import type { Href } from "expo-router";
-import { router, usePathname } from "expo-router";
-import React, { useMemo } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
-import { Button, MD3Theme, useTheme } from "react-native-paper";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import type { Href } from 'expo-router';
+import { router, usePathname } from 'expo-router';
+import React, { useMemo } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Button, MD3Theme, useTheme } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useDogCounts } from "../state/DogCountsProvider";
-import { logEvent } from "../utils/logger";
+import { useDogCounts } from '../state/DogCountsProvider';
+import { logEvent } from '../utils/logger';
 
-type NavKey = "home" | "new" | "list" | "my";
+type NavKey = 'home' | 'new' | 'list' | 'my';
 
 export const ROUTES = {
-  home: "/" as Href,
-  new: "/new-dog" as Href,
-  list: "/dogs-list" as Href,
-  my: "/my-dogs-list" as Href,
-  me: "/me" as Href,
+  home: '/' as Href,
+  new: '/new-dog' as Href,
+  list: '/dogs-list' as Href,
+  my: '/my-dogs-list' as Href,
+  me: '/me' as Href,
 } as const;
 
 function keyFromPathname(pathname: string): NavKey {
-  if (pathname === "/" || pathname.startsWith("/home")) return "home";
-  if (pathname.startsWith("/new-dog")) return "new";
-  if (pathname.startsWith("/my-dogs-list")) return "my";
-  if (pathname.startsWith("/dogs") || pathname.startsWith("/dog-profile"))
-    return "list";
-  return "home";
+  if (pathname === '/' || pathname.startsWith('/home')) return 'home';
+  if (pathname.startsWith('/new-dog')) return 'new';
+  if (pathname.startsWith('/my-dogs-list')) return 'my';
+  if (pathname.startsWith('/dogs') || pathname.startsWith('/dog-profile')) return 'list';
+  return 'home';
 }
 
 export function TopNav() {
@@ -32,15 +31,15 @@ export function TopNav() {
   const insets = useSafeAreaInsets();
 
   const pathname = usePathname();
-  const activeKey = useMemo(() => keyFromPathname(pathname ?? "/"), [pathname]);
+  const activeKey = useMemo(() => keyFromPathname(pathname ?? '/'), [pathname]);
 
   const { myDogsCount } = useDogCounts();
-  const myDogsLabel = myDogsCount === 1 ? "My Dog" : "My Dogs";
+  const myDogsLabel = myDogsCount === 1 ? 'My Dog' : 'My Dogs';
 
   const go = (key: NavKey) => {
     const to = ROUTES[key];
     if (!to) {
-      console.error("TopNav missing route for key:", key, ROUTES);
+      console.error('TopNav missing route for key:', key, ROUTES);
       return;
     }
     logEvent(`Nav:top:${key}`, { to });
@@ -57,13 +56,10 @@ export function TopNav() {
         contentContainerStyle={styles.row}
       >
         <Button
-          mode={activeKey === "home" ? "contained-tonal" : "outlined"}
-          onPress={() => go("home")}
+          mode={activeKey === 'home' ? 'contained-tonal' : 'outlined'}
+          onPress={() => go('home')}
           compact
-          style={[
-            styles.button,
-            activeKey === "home" ? styles.buttonActive : null,
-          ]}
+          style={[styles.button, activeKey === 'home' ? styles.buttonActive : null]}
           contentStyle={styles.buttonContent}
           labelStyle={styles.buttonLabel}
         >
@@ -71,12 +67,12 @@ export function TopNav() {
         </Button>
         <Button
           mode="contained"
-          onPress={() => go("new")}
+          onPress={() => go('new')}
           compact
           style={[
             styles.button,
             styles.newButton,
-            activeKey === "new" ? styles.buttonActive : null,
+            activeKey === 'new' ? styles.buttonActive : null,
           ]}
           contentStyle={styles.buttonContent}
           labelStyle={styles.buttonLabel}
@@ -85,13 +81,10 @@ export function TopNav() {
         </Button>
 
         <Button
-          mode={activeKey === "list" ? "contained-tonal" : "outlined"}
-          onPress={() => go("list")}
+          mode={activeKey === 'list' ? 'contained-tonal' : 'outlined'}
+          onPress={() => go('list')}
           compact
-          style={[
-            styles.button,
-            activeKey === "list" ? styles.buttonActive : null,
-          ]}
+          style={[styles.button, activeKey === 'list' ? styles.buttonActive : null]}
           contentStyle={styles.buttonContent}
           labelStyle={styles.buttonLabel}
         >
@@ -99,13 +92,10 @@ export function TopNav() {
         </Button>
 
         <Button
-          mode={activeKey === "my" ? "contained-tonal" : "outlined"}
-          onPress={() => go("my")}
+          mode={activeKey === 'my' ? 'contained-tonal' : 'outlined'}
+          onPress={() => go('my')}
           compact
-          style={[
-            styles.button,
-            activeKey === "my" ? styles.buttonActive : null,
-          ]}
+          style={[styles.button, activeKey === 'my' ? styles.buttonActive : null]}
           contentStyle={styles.buttonContent}
           labelStyle={styles.buttonLabel}
         >
@@ -130,12 +120,12 @@ function makeStyles(theme: MD3Theme) {
       paddingBottom: 8,
     },
     row: {
-      alignItems: "center",
+      alignItems: 'center',
       gap: 8,
     },
     homeWrap: {
       borderRadius: 12,
-      overflow: "hidden",
+      overflow: 'hidden',
     },
     homeButton: {
       margin: 0,

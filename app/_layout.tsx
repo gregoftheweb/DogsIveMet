@@ -1,11 +1,15 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from "expo-router/react-navigation";
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider as NavigationThemeProvider,
+} from 'expo-router/react-navigation';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-import { PaperProvider, configureFonts } from 'react-native-paper';
+import { PaperProvider } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { useColorScheme } from '@/components/useColorScheme';
@@ -60,7 +64,7 @@ function RootLayoutNav() {
   const { activeTheme } = useThemeMode();
 
   return (
-    <PaperProvider 
+    <PaperProvider
       theme={activeTheme}
       settings={{
         icon: (props) => <MaterialCommunityIcons {...props} />,

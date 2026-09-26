@@ -1,20 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  StyleSheet,
-  View,
-  FlatList,
-  RefreshControl,
-  ScrollView,
-} from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { StyleSheet, View, FlatList, RefreshControl, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useFocusEffect } from "expo-router/react-navigation";
+import { useFocusEffect } from 'expo-router/react-navigation';
 import {
   Searchbar,
   Button,
   Card,
   List,
   IconButton,
-  ActivityIndicator,
   Appbar,
   useTheme,
   FAB,
@@ -33,10 +26,9 @@ export default function MyDogsListScreen() {
   const router = useRouter();
   const theme = useTheme();
   const { refreshCounts } = useDogCounts();
-  
+
   // State
   const [allMyDogs, setAllMyDogs] = useState<Dog[]>([]);
-  const [filteredDogs, setFilteredDogs] = useState<Dog[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBreed, setSelectedBreed] = useState('All Breeds');
   const [sortOption, setSortOption] = useState<SortOption>('newest');
@@ -58,11 +50,11 @@ export default function MyDogsListScreen() {
     try {
       const myDogs = await getMyDogs();
       setAllMyDogs(myDogs);
-      
+
       // Extract unique breeds
-      const breeds = Array.from(new Set(myDogs.map(dog => dog.breed))).sort();
+      const breeds = Array.from(new Set(myDogs.map((dog) => dog.breed))).sort();
       setAvailableBreeds(['All Breeds', ...breeds]);
-      
+
       logEvent('MyDogs:load:success', { count: myDogs.length });
     } catch (error) {
       logError(error instanceof Error ? error : new Error(String(error)), {
@@ -71,34 +63,27 @@ export default function MyDogsListScreen() {
     }
   }, []);
 
-  // Load on mount
-  useEffect(() => {
-    loadMyDogs();
-  }, [loadMyDogs]);
-
-  // Reload on focus
+  // Reload on focus (also covers initial mount)
   useFocusEffect(
     useCallback(() => {
       loadMyDogs();
       refreshCounts();
-    }, [loadMyDogs, refreshCounts])
+    }, [loadMyDogs, refreshCounts]),
   );
 
   // Filter and sort dogs whenever dependencies change
-  useEffect(() => {
+  const filteredDogs = useMemo(() => {
     let result = [...allMyDogs];
 
     // Apply breed filter
     if (selectedBreed !== 'All Breeds') {
-      result = result.filter(dog => dog.breed === selectedBreed);
+      result = result.filter((dog) => dog.breed === selectedBreed);
     }
 
     // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      result = result.filter(dog => 
-        dog.name.toLowerCase().includes(query)
-      );
+      result = result.filter((dog) => dog.name.toLowerCase().includes(query));
     }
 
     // Sort by date (use createdAt for My Dogs since these are user's own dogs)
@@ -108,7 +93,7 @@ export default function MyDogsListScreen() {
       return sortOption === 'newest' ? dateB - dateA : dateA - dateB;
     });
 
-    setFilteredDogs(result);
+    return result;
   }, [allMyDogs, searchQuery, selectedBreed, sortOption]);
 
   // Pull to refresh
@@ -172,10 +157,10 @@ export default function MyDogsListScreen() {
   // Format date for display
   const formatDate = (isoDate: string): string => {
     const date = new Date(isoDate);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
   };
 
@@ -184,12 +169,8 @@ export default function MyDogsListScreen() {
     <List.Item
       title={item.name}
       description={`${item.breed} • ${formatDate(item.createdAt)}`}
-      left={(props) => (
-        <List.Icon {...props} icon="paw" color={theme.colors.primary} />
-      )}
-      right={(props) => (
-        <List.Icon {...props} icon="chevron-right" />
-      )}
+      left={(props) => <List.Icon {...props} icon="paw" color={theme.colors.primary} />}
+      right={(props) => <List.Icon {...props} icon="chevron-right" />}
       onPress={() => handleDogPress(item.id)}
       style={{ backgroundColor: theme.colors.background }}
     />
@@ -202,27 +183,14 @@ export default function MyDogsListScreen() {
         <TopNav />
         <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
           <View style={styles.emptyContainer}>
-            <IconButton
-              icon="paw"
-              size={64}
-              iconColor={theme.colors.outline}
-            />
+            <IconButton icon="paw" size={64} iconColor={theme.colors.outline} />
             <Card style={[styles.emptyCard, { backgroundColor: theme.colors.surface }]}>
               <Card.Content>
-                <List.Subheader style={styles.emptySubheader}>
-                  No dogs added yet.
-                </List.Subheader>
-                <Button
-                  mode="contained"
-                  onPress={handleAddMyDog}
-                  style={styles.emptyCardContent}
-                >
+                <List.Subheader style={styles.emptySubheader}>No dogs added yet.</List.Subheader>
+                <Button mode="contained" onPress={handleAddMyDog} style={styles.emptyCardContent}>
                   Add My Dog
                 </Button>
-                <Button
-                  mode="outlined"
-                  onPress={handleHomePress}
-                >
+                <Button mode="outlined" onPress={handleHomePress}>
                   Home
                 </Button>
               </Card.Content>
@@ -242,133 +210,103 @@ export default function MyDogsListScreen() {
       <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         {/* Controls */}
         <View style={[styles.controls, { backgroundColor: theme.colors.surface }]}>
-        {/* Search Input */}
-        <Searchbar
-          placeholder="Search by name"
-          onChangeText={(text) => {
-            setSearchQuery(text);
-            logEvent('MyDogs:search:change', { queryLength: text.length });
-          }}
-          value={searchQuery}
-          style={styles.searchbarStyle}
-        />
-
-        {/* Breed Filter and Sort */}
-        <View style={styles.filterRow}>
-          <Button
-            mode={selectedBreed !== 'All Breeds' ? 'contained' : 'outlined'}
-            onPress={() => setBreedModalVisible(true)}
-            style={{ flex: 1 }}
-            compact
-          >
-            {selectedBreed}
-          </Button>
-
-          <Button
-            mode="outlined"
-            icon={sortOption === 'newest' ? 'arrow-down' : 'arrow-up'}
-            onPress={handleSortToggle}
-            compact
-          >
-            {sortOption === 'newest' ? 'Newest' : 'Oldest'}
-          </Button>
-        </View>
-      </View>
-
-      {/* List or No Results */}
-      {showNoResults ? (
-        <View style={styles.noResultsContainer}>
-          <IconButton
-            icon="magnify"
-            size={48}
-            iconColor={theme.colors.outline}
+          {/* Search Input */}
+          <Searchbar
+            placeholder="Search by name"
+            onChangeText={handleSearchChange}
+            value={searchQuery}
+            style={styles.searchbarStyle}
           />
-          <List.Subheader style={styles.noResultsSubheader}>
-            No matches found.
-          </List.Subheader>
-          <Button
-            mode="contained"
-            onPress={handleClearFilters}
-          >
-            Clear filters
-          </Button>
+
+          {/* Breed Filter and Sort */}
+          <View style={styles.filterRow}>
+            <Button
+              mode={selectedBreed !== 'All Breeds' ? 'contained' : 'outlined'}
+              onPress={() => setBreedModalVisible(true)}
+              style={{ flex: 1 }}
+              compact
+            >
+              {selectedBreed}
+            </Button>
+
+            <Button
+              mode="outlined"
+              icon={sortOption === 'newest' ? 'arrow-down' : 'arrow-up'}
+              onPress={handleSortToggle}
+              compact
+            >
+              {sortOption === 'newest' ? 'Newest' : 'Oldest'}
+            </Button>
+          </View>
         </View>
-      ) : (
-        <FlatList
-          data={filteredDogs}
-          renderItem={renderDogRow}
-          keyExtractor={(item) => item.id}
-          style={styles.list}
-          contentContainerStyle={styles.listContent}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
+
+        {/* List or No Results */}
+        {showNoResults ? (
+          <View style={styles.noResultsContainer}>
+            <IconButton icon="magnify" size={48} iconColor={theme.colors.outline} />
+            <List.Subheader style={styles.noResultsSubheader}>No matches found.</List.Subheader>
+            <Button mode="contained" onPress={handleClearFilters}>
+              Clear filters
+            </Button>
+          </View>
+        ) : (
+          <FlatList
+            data={filteredDogs}
+            renderItem={renderDogRow}
+            keyExtractor={(item) => item.id}
+            style={styles.list}
+            contentContainerStyle={styles.listContent}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          />
+        )}
+
+        {/* Breed Filter Modal using Paper's Modal and Portal */}
+        <Portal>
+          <Modal
+            visible={breedModalVisible}
+            onDismiss={() => setBreedModalVisible(false)}
+            contentContainerStyle={[styles.modalContent, { backgroundColor: theme.colors.surface }]}
+          >
+            <Appbar.Header style={{ backgroundColor: theme.colors.surface }}>
+              <Appbar.Content title="Filter by Breed" />
+              <Appbar.Action icon="close" onPress={() => setBreedModalVisible(false)} />
+            </Appbar.Header>
+            <ScrollView style={styles.modalScroll}>
+              {availableBreeds.map((breed) => (
+                <List.Item
+                  key={breed}
+                  title={breed}
+                  onPress={() => handleBreedSelect(breed)}
+                  left={(props) => {
+                    if (selectedBreed === breed) {
+                      return <List.Icon {...props} icon="check" color={theme.colors.primary} />;
+                    }
+                    return null;
+                  }}
+                  style={{
+                    backgroundColor:
+                      selectedBreed === breed
+                        ? theme.colors.primaryContainer
+                        : theme.colors.surface,
+                  }}
+                  titleStyle={{
+                    color: selectedBreed === breed ? theme.colors.primary : theme.colors.onSurface,
+                    fontWeight: selectedBreed === breed ? '600' : '400',
+                  }}
+                />
+              ))}
+            </ScrollView>
+          </Modal>
+        </Portal>
+
+        {/* FAB for Add My Dog */}
+        <FAB
+          icon="plus"
+          label="Add My Dog"
+          onPress={handleAddMyDog}
+          style={[styles.fab, { backgroundColor: theme.colors.primary }]}
         />
-      )}
-
-      {/* Breed Filter Modal using Paper's Modal and Portal */}
-      <Portal>
-        <Modal
-          visible={breedModalVisible}
-          onDismiss={() => setBreedModalVisible(false)}
-          contentContainerStyle={[
-            styles.modalContent,
-            { backgroundColor: theme.colors.surface },
-          ]}
-        >
-          <Appbar.Header style={{ backgroundColor: theme.colors.surface }}>
-            <Appbar.Content title="Filter by Breed" />
-            <Appbar.Action
-              icon="close"
-              onPress={() => setBreedModalVisible(false)}
-            />
-          </Appbar.Header>
-          <ScrollView style={styles.modalScroll}>
-            {availableBreeds.map((breed) => (
-              <List.Item
-                key={breed}
-                title={breed}
-                onPress={() => handleBreedSelect(breed)}
-                left={(props) => {
-                  if (selectedBreed === breed) {
-                    return (
-                      <List.Icon
-                        {...props}
-                        icon="check"
-                        color={theme.colors.primary}
-                      />
-                    );
-                  }
-                  return null;
-                }}
-                style={{
-                  backgroundColor:
-                    selectedBreed === breed
-                      ? theme.colors.primaryContainer
-                      : theme.colors.surface,
-                }}
-                titleStyle={{
-                  color:
-                    selectedBreed === breed
-                      ? theme.colors.primary
-                      : theme.colors.onSurface,
-                  fontWeight:
-                    selectedBreed === breed ? '600' : '400',
-                }}
-              />
-            ))}
-          </ScrollView>
-        </Modal>
-      </Portal>
-
-      {/* FAB for Add My Dog */}
-      <FAB
-        icon="plus"
-        label="Add My Dog"
-        onPress={handleAddMyDog}
-        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
-      />
-    </View>
+      </View>
     </>
   );
 }

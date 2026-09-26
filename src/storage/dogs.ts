@@ -8,20 +8,20 @@ export function normalizeName(name: string): string {
   return name.trim();
 }
 
-export function validateDogInput(dog: {
-  name: string;
-  breed: string;
-}): { ok: boolean; message?: string } {
+export function validateDogInput(dog: { name: string; breed: string }): {
+  ok: boolean;
+  message?: string;
+} {
   const trimmedName = normalizeName(dog.name);
-  
+
   if (!trimmedName) {
     return { ok: false, message: 'Name is required' };
   }
-  
+
   if (!dog.breed || !dog.breed.trim()) {
     return { ok: false, message: 'Breed is required' };
   }
-  
+
   return { ok: true };
 }
 
@@ -42,7 +42,7 @@ export async function getDogs(): Promise<Dog[]> {
 export async function getDogById(id: string): Promise<Dog | undefined> {
   try {
     const dogs = await getDogs();
-    return dogs.find(dog => dog.id === id);
+    return dogs.find((dog) => dog.id === id);
   } catch (error) {
     console.error('Error getting dog by id:', error);
     return undefined;
@@ -63,12 +63,12 @@ export async function addDog(dog: Dog): Promise<void> {
 export async function updateDog(updated: Dog): Promise<void> {
   try {
     const dogs = await getDogs();
-    const index = dogs.findIndex(dog => dog.id === updated.id);
-    
+    const index = dogs.findIndex((dog) => dog.id === updated.id);
+
     if (index === -1) {
       throw new Error(`Dog with id ${updated.id} not found`);
     }
-    
+
     // Automatically update the updatedAt timestamp
     dogs[index] = {
       ...updated,
@@ -84,7 +84,7 @@ export async function updateDog(updated: Dog): Promise<void> {
 export async function deleteDog(id: string): Promise<void> {
   try {
     const dogs = await getDogs();
-    const filteredDogs = dogs.filter(dog => dog.id !== id);
+    const filteredDogs = dogs.filter((dog) => dog.id !== id);
     await AsyncStorage.setItem(DOGS_STORAGE_KEY, JSON.stringify(filteredDogs));
   } catch (error) {
     console.error('Error deleting dog:', error);
@@ -96,7 +96,7 @@ export async function deleteDog(id: string): Promise<void> {
 export async function getMyDogs(): Promise<Dog[]> {
   try {
     const dogs = await getDogs();
-    return dogs.filter(dog => dog.isMine === true);
+    return dogs.filter((dog) => dog.isMine === true);
   } catch (error) {
     console.error('Error loading my dogs from storage:', error);
     return [];
@@ -106,7 +106,7 @@ export async function getMyDogs(): Promise<Dog[]> {
 export async function getMetDogs(): Promise<Dog[]> {
   try {
     const dogs = await getDogs();
-    return dogs.filter(dog => !dog.isMine);
+    return dogs.filter((dog) => !dog.isMine);
   } catch (error) {
     console.error('Error loading met dogs from storage:', error);
     return [];

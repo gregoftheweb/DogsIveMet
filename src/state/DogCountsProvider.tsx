@@ -32,15 +32,15 @@ export function DogCountsProvider({ children }: DogCountsProviderProps) {
       setMyDogsCount(count);
       logEvent('Counts:refresh:success', { myDogsCount: count });
     } catch (error) {
-      logError(
-        error instanceof Error ? error : new Error(String(error)),
-        { context: 'Counts:refresh:error' }
-      );
+      logError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'Counts:refresh:error',
+      });
     }
   };
 
   // Load counts on mount
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial async load from storage; there's no data-fetching library here, and this can't be computed during render since it awaits AsyncStorage I/O.
     refreshCounts();
   }, []);
 
@@ -49,11 +49,7 @@ export function DogCountsProvider({ children }: DogCountsProviderProps) {
     refreshCounts,
   };
 
-  return (
-    <DogCountsContext.Provider value={value}>
-      {children}
-    </DogCountsContext.Provider>
-  );
+  return <DogCountsContext.Provider value={value}>{children}</DogCountsContext.Provider>;
 }
 
 /**

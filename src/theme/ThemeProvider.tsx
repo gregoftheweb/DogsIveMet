@@ -49,7 +49,10 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     const loadThemeMode = async () => {
       try {
         const storedMode = await AsyncStorage.getItem(THEME_MODE_STORAGE_KEY);
-        if (storedMode && (storedMode === 'system' || storedMode === 'light' || storedMode === 'dark')) {
+        if (
+          storedMode &&
+          (storedMode === 'system' || storedMode === 'light' || storedMode === 'dark')
+        ) {
           setThemeModeState(storedMode as ThemeMode);
           logEvent('Theme:mode:loaded', { themeMode: storedMode });
         } else {
@@ -57,10 +60,9 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
           logEvent('Theme:mode:loaded', { themeMode: 'system', source: 'default' });
         }
       } catch (error) {
-        logError(
-          error instanceof Error ? error : new Error(String(error)),
-          { context: 'Theme:mode:load:error' }
-        );
+        logError(error instanceof Error ? error : new Error(String(error)), {
+          context: 'Theme:mode:load:error',
+        });
         // On error, use default 'system' mode
       } finally {
         setIsLoaded(true);
@@ -78,10 +80,10 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     try {
       await AsyncStorage.setItem(THEME_MODE_STORAGE_KEY, mode);
     } catch (error) {
-      logError(
-        error instanceof Error ? error : new Error(String(error)),
-        { context: 'Theme:mode:save:error', themeMode: mode }
-      );
+      logError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'Theme:mode:save:error',
+        themeMode: mode,
+      });
     }
   };
 
@@ -96,11 +98,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     return null;
   }
 
-  return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
 /**

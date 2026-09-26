@@ -1,13 +1,16 @@
 # Scrolling Fix - Dog Profile & New Dog Pages
 
 ## Issue Description
+
 After the React Native Paper migration, scrolling stopped working on two critical screens:
+
 - Dog Profile page
 - New Dog / Edit Dog form page
 
 ## Root Cause Analysis
 
 ### Primary Issue: ScreenContainer flex: 1 in Scroll Mode
+
 The `ScreenContainer` component was applying `flex: 1` to the ScrollView's `contentContainerStyle` in scroll mode. This caused:
 
 1. **Height Constraint**: Content was constrained to exactly viewport height
@@ -15,11 +18,13 @@ The `ScreenContainer` component was applying `flex: 1` to the ScrollView's `cont
 3. **ScrollView Confusion**: ScrollView calculated there was nothing to scroll
 
 ### Secondary Issue: KeyboardAvoidingView flex: 1
+
 The New Dog form had an additional `flex: 1` on the KeyboardAvoidingView, which further prevented scrolling.
 
 ## Technical Background
 
 In React Native:
+
 - `flex: 1` on a ScrollView's `contentContainerStyle` is **incorrect** - it constrains content
 - ScrollView needs content that can grow naturally beyond viewport
 - `flex: 1` is useful for non-scrollable views that need vertical centering
@@ -29,6 +34,7 @@ In React Native:
 ### 1. ScreenContainer.tsx - Split Content Styles
 
 **Before:**
+
 ```tsx
 const contentStyle = [
   styles.content,  // Has flex: 1
@@ -39,6 +45,7 @@ const contentStyle = [
 ```
 
 **After:**
+
 ```tsx
 const contentStyle = scroll
   ? [styles.scrollableContent]  // No flex: 1
@@ -48,6 +55,7 @@ const contentStyle = scroll
 ```
 
 **New Styles:**
+
 ```tsx
 // For scrollable content - NO flex: 1
 scrollableContent: {
@@ -72,6 +80,7 @@ content: {
 ### 2. new-dog.tsx - Remove KeyboardAvoidingView flex
 
 **Before:**
+
 ```tsx
 keyboardView: {
   flex: 1,  // Prevents scrolling
@@ -79,6 +88,7 @@ keyboardView: {
 ```
 
 **After:**
+
 ```tsx
 keyboardView: {
   // Removed flex: 1 to allow ScrollView to work properly
@@ -86,17 +96,20 @@ keyboardView: {
 ```
 
 ## Files Modified
+
 1. `src/ui/ScreenContainer.tsx` - Split content styles for scroll/non-scroll modes
 2. `app/new-dog.tsx` - Removed flex: 1 from KeyboardAvoidingView
 
 ## Verification
 
 ### Screens Using Scroll Mode (Should Scroll)
+
 ✅ Home screen (`app/index.tsx`) - Uses `<ScreenContainer scroll>`
 ✅ Dog Profile (`app/dog-profile.tsx`) - Uses `<ScreenContainer scroll>`
 ✅ New Dog Form (`app/new-dog.tsx`) - Uses `<ScreenContainer scroll={true}>`
 
 ### Screens Using Non-Scroll Mode (Should Center)
+
 ✅ Me screen (`app/me.tsx`) - Uses `<ScreenContainer>`
 ✅ Loading states - All use `<ScreenContainer>` for centered spinners
 ✅ Error/Not Found states - All use `<ScreenContainer>` for centered messages
@@ -105,7 +118,7 @@ keyboardView: {
 
 - [ ] Dog Profile page scrolls properly
 - [ ] New Dog form scrolls to show all fields
-- [ ] Edit Dog form scrolls to show all fields  
+- [ ] Edit Dog form scrolls to show all fields
 - [ ] Save/Cancel buttons are accessible via scrolling
 - [ ] Me screen remains vertically centered
 - [ ] Loading spinners remain centered
@@ -113,6 +126,7 @@ keyboardView: {
 - [ ] Home screen continues to scroll
 
 ## Impact
+
 - **Scope**: Minimal (2 files, ~20 lines changed)
 - **Risk**: Low (targeted fix, preserves all existing behavior)
 - **Benefit**: High (fixes critical UX regression)
@@ -126,6 +140,7 @@ keyboardView: {
 4. **Flexbox in RN**: `flex: 1` behaves differently in ScrollView vs regular View
 
 ## Related Documentation
+
 - React Native ScrollView: https://reactnative.dev/docs/scrollview
 - Flexbox Layout: https://reactnative.dev/docs/flexbox
 - ScreenContainer: `/src/ui/ScreenContainer.tsx`

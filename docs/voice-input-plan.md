@@ -128,4 +128,3 @@ Deliberately left thin for now — revisit and flesh out into its own plan once 
 ## Open decisions
 
 - **Language/locale** — defaulting to device locale (`en-US`); no UI needed unless multi-language support matters later
-

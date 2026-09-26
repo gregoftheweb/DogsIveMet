@@ -17,28 +17,18 @@ interface ScreenContainerProps {
 export function ScreenContainer({ children, scroll = false, style }: ScreenContainerProps) {
   const theme = useTheme();
 
-  const containerStyle = [
-    styles.container,
-    { backgroundColor: theme.colors.background },
-    style,
-  ];
+  const containerStyle = [styles.container, { backgroundColor: theme.colors.background }, style];
 
   // For scroll mode, don't use flex: 1 - let content grow naturally
   // For non-scroll mode, use flex: 1 to enable centering
   const contentStyle = scroll
-    ? [
-        styles.scrollableContent,
-        { backgroundColor: theme.colors.background },
-      ]
-    : [
-        styles.content,
-        { backgroundColor: theme.colors.background },
-      ];
+    ? [styles.scrollableContent, { backgroundColor: theme.colors.background }]
+    : [styles.content, { backgroundColor: theme.colors.background }];
 
   if (scroll) {
     return (
       <SafeAreaView style={containerStyle} edges={['left', 'right', 'bottom']}>
-        <ScrollView 
+        <ScrollView
           style={styles.scrollView}
           contentContainerStyle={contentStyle}
           keyboardShouldPersistTaps="handled"
@@ -51,9 +41,7 @@ export function ScreenContainer({ children, scroll = false, style }: ScreenConta
 
   return (
     <SafeAreaView style={containerStyle} edges={['left', 'right', 'bottom']}>
-      <View style={contentStyle}>
-        {children}
-      </View>
+      <View style={contentStyle}>{children}</View>
     </SafeAreaView>
   );
 }
