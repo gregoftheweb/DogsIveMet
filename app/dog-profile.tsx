@@ -235,6 +235,11 @@ export default function DogProfileScreen() {
           {/* Details Section */}
           <List.Section style={styles.detailsSection}>
             <List.Item
+              title="Owner"
+              description={dog.ownerName || '(none)'}
+              left={(props) => <List.Icon {...props} icon="account" />}
+            />
+            <List.Item
               title="Breed"
               description={dog.breed}
               left={(props) => <List.Icon {...props} icon="dog" />}
