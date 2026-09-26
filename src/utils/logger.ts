@@ -13,7 +13,7 @@ export interface LogEventData {
 /**
  * Log an event with optional data for debugging and workflow tracking.
  * Only logs in development mode.
- * 
+ *
  * @param event - Event name/description
  * @param data - Optional key-value pairs with event details
  */
@@ -24,7 +24,7 @@ export function logEvent(event: string, data?: LogEventData): void {
 
   const timestamp = new Date().toISOString();
   const prefix = '[DogsIveMet]';
-  
+
   if (data && Object.keys(data).length > 0) {
     console.log(`${prefix} ${timestamp} - ${event}`, data);
   } else {
@@ -35,7 +35,7 @@ export function logEvent(event: string, data?: LogEventData): void {
 /**
  * Log an error with optional context data.
  * Logs in both dev and production for critical errors.
- * 
+ *
  * @param error - Error object or message
  * @param context - Optional context information
  */
@@ -44,13 +44,13 @@ export function logError(error: Error | string, context?: LogEventData): void {
   const prefix = '[DogsIveMet Error]';
   const errorMessage = error instanceof Error ? error.message : error;
   const errorStack = error instanceof Error ? error.stack : undefined;
-  
+
   console.error(`${prefix} ${timestamp} - ${errorMessage}`);
-  
+
   if (context) {
     console.error('Context:', context);
   }
-  
+
   if (errorStack) {
     console.error('Stack:', errorStack);
   }

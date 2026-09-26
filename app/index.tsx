@@ -15,73 +15,73 @@ export default function HomeScreen() {
       <TopNav />
       <ScreenContainer scroll>
         <View style={styles.container}>
-        {/* App Title */}
-        <Text variant="displaySmall" style={[styles.title, { color: theme.colors.onBackground }]}>
-          Dogs I've Met
-        </Text>
+          {/* App Title */}
+          <Text variant="displaySmall" style={[styles.title, { color: theme.colors.onBackground }]}>
+            Dogs I&apos;ve Met
+          </Text>
 
-        {/* Logo */}
-        <Image
-          source={require('../assets/images/DIM-Logo-150.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
+          {/* Logo */}
+          <Image
+            source={require('../assets/images/DIM-Logo-150.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
 
-        {/* Navigation Buttons */}
-        <View style={styles.buttonsContainer}>
-          <Button
-            mode="contained"
-            onPress={() => router.push('/new-dog')}
-            style={styles.button}
-            contentStyle={styles.buttonContent}
-          >
-            New Dog
-          </Button>
-
-          <Button
-            mode="contained"
-            onPress={() => router.push('/dogs-list')}
-            style={styles.button}
-            contentStyle={styles.buttonContent}
-          >
-            List of Dogs
-          </Button>
-
-          <Button
-            mode="contained"
-            onPress={() => {
-              logEvent('Nav:to:MyDogs');
-              router.push('/my-dogs-list');
-            }}
-            style={styles.button}
-            contentStyle={styles.buttonContent}
-          >
-            My Dogs
-          </Button>
-
-          <Button
-            mode="outlined"
-            onPress={() => router.push('/me')}
-            style={styles.button}
-            contentStyle={styles.buttonContent}
-          >
-            Me
-          </Button>
-        </View>
-
-        {/* Advertising Placeholder */}
-        <Card style={styles.adCard} mode="outlined">
-          <Card.Content>
-            <Text 
-              variant="bodyMedium" 
-              style={[styles.adText, { color: theme.colors.onSurfaceVariant }]}
+          {/* Navigation Buttons */}
+          <View style={styles.buttonsContainer}>
+            <Button
+              mode="contained"
+              onPress={() => router.push('/new-dog')}
+              style={styles.button}
+              contentStyle={styles.buttonContent}
             >
-              Advertising
-            </Text>
-          </Card.Content>
-        </Card>
-      </View>
-    </ScreenContainer>
+              New Dog
+            </Button>
+
+            <Button
+              mode="contained"
+              onPress={() => router.push('/dogs-list')}
+              style={styles.button}
+              contentStyle={styles.buttonContent}
+            >
+              List of Dogs
+            </Button>
+
+            <Button
+              mode="contained"
+              onPress={() => {
+                logEvent('Nav:to:MyDogs');
+                router.push('/my-dogs-list');
+              }}
+              style={styles.button}
+              contentStyle={styles.buttonContent}
+            >
+              My Dogs
+            </Button>
+
+            <Button
+              mode="outlined"
+              onPress={() => router.push('/me')}
+              style={styles.button}
+              contentStyle={styles.buttonContent}
+            >
+              Me
+            </Button>
+          </View>
+
+          {/* Advertising Placeholder */}
+          <Card style={styles.adCard} mode="outlined">
+            <Card.Content>
+              <Text
+                variant="bodyMedium"
+                style={[styles.adText, { color: theme.colors.onSurfaceVariant }]}
+              >
+                Advertising
+              </Text>
+            </Card.Content>
+          </Card>
+        </View>
+      </ScreenContainer>
     </>
   );
 }

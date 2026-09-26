@@ -1,21 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  Image,
-  Alert,
-  Platform,
-  KeyboardAvoidingView,
-} from 'react-native';
+import { StyleSheet, View, Text, Image, Alert, Platform, KeyboardAvoidingView } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useFocusEffect } from "expo-router/react-navigation";
+import { useFocusEffect } from 'expo-router/react-navigation';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import {
   TextInput,
   Button,
-  IconButton,
   ActivityIndicator,
   Dialog,
   List,
@@ -66,7 +57,7 @@ export default function NewDogScreen() {
   const [loading, setLoading] = useState(isEditMode);
   const [notFound, setNotFound] = useState(false);
   const [existingDog, setExistingDog] = useState<Dog | null>(null);
-  
+
   const [name, setName] = useState('');
   const [breed, setBreed] = useState('Unknown');
   const [photoUri, setPhotoUri] = useState<string | undefined>(undefined);
@@ -120,7 +111,7 @@ export default function NewDogScreen() {
 
     try {
       const foundDog = await getDogById(dogId);
-      
+
       if (foundDog) {
         setExistingDog(foundDog);
         setName(foundDog.name);
@@ -139,17 +130,17 @@ export default function NewDogScreen() {
           ownerName: foundDog.ownerName || '',
           notes: foundDog.notes || '',
         });
-        
+
         logEvent('EditDog:load:success', { id: dogId });
       } else {
         setNotFound(true);
         logEvent('EditDog:load:not_found', { id: dogId });
       }
     } catch (error) {
-      logError(
-        error instanceof Error ? error : new Error(String(error)),
-        { context: 'EditDog:load:error', id: dogId }
-      );
+      logError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'EditDog:load:error',
+        id: dogId,
+      });
       setNotFound(true);
     } finally {
       setLoading(false);
@@ -160,7 +151,7 @@ export default function NewDogScreen() {
   useFocusEffect(
     useCallback(() => {
       loadDogData();
-    }, [loadDogData])
+    }, [loadDogData]),
   );
 
   // Log screen mount
@@ -189,19 +180,25 @@ export default function NewDogScreen() {
     try {
       // Request camera permissions
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      
+
       if (status !== 'granted') {
-        logEvent(isEditMode ? `${eventPrefix}:permission_denied` : 'New Dog - Camera permission denied');
+        logEvent(
+          isEditMode ? `${eventPrefix}:permission_denied` : 'New Dog - Camera permission denied',
+        );
         Alert.alert(
           'Camera Permission Required',
           'Please enable camera permissions in your device settings to take photos of dogs.',
-          [{ text: 'OK' }]
+          [{ text: 'OK' }],
         );
         return;
       }
 
-      logEvent(isEditMode ? `${eventPrefix}:permission_granted` : 'New Dog - Camera permission granted, launching camera');
-      
+      logEvent(
+        isEditMode
+          ? `${eventPrefix}:permission_granted`
+          : 'New Dog - Camera permission granted, launching camera',
+      );
+
       // Launch camera
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
@@ -222,10 +219,9 @@ export default function NewDogScreen() {
         logEvent(isEditMode ? `${eventPrefix}:cancel` : 'New Dog - Photo capture cancelled');
       }
     } catch (error) {
-      logError(
-        error instanceof Error ? error : new Error(String(error)), 
-        { context: isEditMode ? `${eventPrefix}:error` : 'New Dog - Photo capture failed' }
-      );
+      logError(error instanceof Error ? error : new Error(String(error)), {
+        context: isEditMode ? `${eventPrefix}:error` : 'New Dog - Photo capture failed',
+      });
       Alert.alert('Error', 'Failed to take photo. Please try again.');
     }
   };
@@ -239,18 +235,18 @@ export default function NewDogScreen() {
 
     const eventPrefix = getEventPrefix();
     const logMetadata = isMineParam && !isEditMode ? { isMine: true } : {};
-    
-    logEvent(`${eventPrefix}:save:press`, { 
-      name: name.trim(), 
-      breed, 
-      ...logMetadata 
+
+    logEvent(`${eventPrefix}:save:press`, {
+      name: name.trim(),
+      breed,
+      ...logMetadata,
     });
 
     // Validate required fields
     const trimmedName = name.trim();
     if (!trimmedName) {
       logEvent(`${eventPrefix}:save:validation_failed`, { reason: 'Name is empty' });
-      Alert.alert('Validation Error', 'Please enter the dog\'s name.');
+      Alert.alert('Validation Error', "Please enter the dog's name.");
       return;
     }
     if (!breed) {
@@ -278,7 +274,11 @@ export default function NewDogScreen() {
           createdAt: existingDog.createdAt,
         };
 
-        logEvent('EditDog:save:dog_object_created', { id: existingDog.id, name: trimmedName, breed });
+        logEvent('EditDog:save:dog_object_created', {
+          id: existingDog.id,
+          name: trimmedName,
+          breed,
+        });
 
         await updateDog(updatedDog);
         logEvent('EditDog:save:success', { id: existingDog.id });
@@ -299,12 +299,13 @@ export default function NewDogScreen() {
         }, TOAST_NAVIGATION_DELAY_MS);
       } else {
         // Create new dog
-        const id = typeof crypto !== 'undefined' && crypto.randomUUID 
-          ? crypto.randomUUID() 
-          : `${Date.now()}-${Math.random().toString(36).substring(2, 11).padEnd(9, '0')}`;
-        
+        const id =
+          typeof crypto !== 'undefined' && crypto.randomUUID
+            ? crypto.randomUUID()
+            : `${Date.now()}-${Math.random().toString(36).substring(2, 11).padEnd(9, '0')}`;
+
         const now = new Date().toISOString();
-        
+
         const newDog: Dog = {
           id,
           name: trimmedName,
@@ -319,11 +320,11 @@ export default function NewDogScreen() {
           ...(isMineParam ? { isMine: true } : {}),
         };
 
-        logEvent(`${eventPrefix} - Dog object created`, { 
-          id, 
-          name: trimmedName, 
-          breed, 
-          ...logMetadata 
+        logEvent(`${eventPrefix} - Dog object created`, {
+          id,
+          name: trimmedName,
+          breed,
+          ...logMetadata,
         });
 
         await addDog(newDog);
@@ -345,15 +346,12 @@ export default function NewDogScreen() {
         }, TOAST_NAVIGATION_DELAY_MS);
       }
     } catch (error) {
-      logError(
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          context: `${eventPrefix}:save:error`,
-          dogName: trimmedName,
-          breed,
-          ...(isEditMode && existingDog ? { id: existingDog.id } : {}),
-        }
-      );
+      logError(error instanceof Error ? error : new Error(String(error)), {
+        context: `${eventPrefix}:save:error`,
+        dogName: trimmedName,
+        breed,
+        ...(isEditMode && existingDog ? { id: existingDog.id } : {}),
+      });
       // Show toast for immediate feedback
       showToast(SAVE_ERROR_MESSAGE, 'error');
     } finally {
@@ -391,7 +389,7 @@ export default function NewDogScreen() {
             style: 'destructive',
             onPress: proceedWithCancel,
           },
-        ]
+        ],
       );
     } else {
       proceedWithCancel();
@@ -450,169 +448,157 @@ export default function NewDogScreen() {
     <>
       <TopNav />
       <ScreenContainer scroll={true}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.keyboardView}
-      >
-        {/* Name Input */}
-        <View style={styles.inputContainer}>
-          <TextInput
-            label="Name *"
-            value={name}
-            onChangeText={setName}
-            mode="outlined"
-            placeholder="Enter the dog's name"
-            autoCapitalize="words"
-          />
-        </View>
-
-        {/* Photo Section - Conditional Rendering */}
-        <View style={styles.inputContainer}>
-          {!photoUri ? (
-            // Before photo: Show compact Take Photo button
-            <>
-              <Button
-                mode="contained"
-                icon="camera"
-                onPress={handleTakePhoto}
-                style={styles.takePhotoButton}
-              >
-                Take Photo
-              </Button>
-              <PaperText
-                variant="bodySmall"
-                style={[styles.helperText, { color: theme.colors.onSurfaceVariant }]}
-              >
-                Add a photo to help remember this dog.
-              </PaperText>
-            </>
-          ) : (
-            // After photo: Show image preview + retake button
-            <>
-              <Surface style={styles.imageContainer}>
-                <Image source={{ uri: photoUri }} style={styles.photoImage} />
-              </Surface>
-              <Button
-                mode="outlined"
-                icon="camera-reverse"
-                onPress={handleTakePhoto}
-                style={styles.retakeButton}
-              >
-                Retake Photo
-              </Button>
-            </>
-          )}
-        </View>
-
-        {/* Owner Input */}
-        <View style={styles.inputContainer}>
-          <TextInput
-            label="Owner"
-            value={ownerName}
-            onChangeText={setOwnerName}
-            mode="outlined"
-            placeholder="e.g., Jane Smith"
-            autoCapitalize="words"
-          />
-        </View>
-
-        {/* Breed Picker */}
-        <View style={styles.inputContainer}>
-          <Button
-            mode="outlined"
-            onPress={() => setBreedDialogVisible(true)}
-            style={styles.breedButton}
-          >
-            {breed} *
-          </Button>
-        </View>
-
-        {/* Location Input */}
-        <View style={styles.inputContainer}>
-          <TextInput
-            label="Where did I meet this dog?"
-            value={metLocationText}
-            onChangeText={setMetLocationText}
-            mode="outlined"
-            placeholder="e.g., Park, Pet Store, Friend's House"
-            autoCapitalize="words"
-          />
-        </View>
-
-        {/* Notes Input */}
-        <View style={styles.inputContainer}>
-          <TextInput
-            label="Notes"
-            value={notes}
-            onChangeText={setNotes}
-            mode="outlined"
-            placeholder="Any notes about this dog..."
-            multiline
-            numberOfLines={4}
-          />
-        </View>
-
-        {/* Action Buttons */}
-        <View style={styles.actionsContainer}>
-          <Button
-            mode="contained"
-            onPress={handleSave}
-            disabled={isSaving}
-            loading={isSaving}
-          >
-            {isEditMode ? 'Save Changes' : 'Save Dog'}
-          </Button>
-
-          <Button
-            mode="outlined"
-            onPress={handleCancel}
-            disabled={isSaving}
-          >
-            Cancel
-          </Button>
-        </View>
-      </KeyboardAvoidingView>
-
-      {/* Breed Selection Dialog */}
-      <Portal>
-        <Dialog
-          visible={breedDialogVisible}
-          onDismiss={() => setBreedDialogVisible(false)}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.keyboardView}
         >
-          <Dialog.Title>Select Breed</Dialog.Title>
-          <Dialog.Content>
-            {BREEDS.map((breedOption) => (
-              <List.Item
-                key={breedOption}
-                title={breedOption}
-                right={() =>
-                  breed === breedOption ? (
-                    <Ionicons name="checkmark" size={24} color={theme.colors.primary} />
-                  ) : null
-                }
-                onPress={() => {
-                  setBreed(breedOption);
-                  setBreedDialogVisible(false);
-                }}
-                style={[
-                  breed === breedOption && {
-                    backgroundColor: theme.colors.primaryContainer,
-                  },
-                ]}
-              />
-            ))}
-          </Dialog.Content>
-        </Dialog>
-      </Portal>
+          {/* Name Input */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              label="Name *"
+              value={name}
+              onChangeText={setName}
+              mode="outlined"
+              placeholder="Enter the dog's name"
+              autoCapitalize="words"
+            />
+          </View>
 
-      {/* Toast Notification */}
-      <Toast
-        message={toastMessage}
-        visible={toastVisible}
-        type={toastType}
-        onHide={() => setToastVisible(false)}
-      />
-    </ScreenContainer>
+          {/* Photo Section - Conditional Rendering */}
+          <View style={styles.inputContainer}>
+            {!photoUri ? (
+              // Before photo: Show compact Take Photo button
+              <>
+                <Button
+                  mode="contained"
+                  icon="camera"
+                  onPress={handleTakePhoto}
+                  style={styles.takePhotoButton}
+                >
+                  Take Photo
+                </Button>
+                <PaperText
+                  variant="bodySmall"
+                  style={[styles.helperText, { color: theme.colors.onSurfaceVariant }]}
+                >
+                  Add a photo to help remember this dog.
+                </PaperText>
+              </>
+            ) : (
+              // After photo: Show image preview + retake button
+              <>
+                <Surface style={styles.imageContainer}>
+                  <Image source={{ uri: photoUri }} style={styles.photoImage} />
+                </Surface>
+                <Button
+                  mode="outlined"
+                  icon="camera-reverse"
+                  onPress={handleTakePhoto}
+                  style={styles.retakeButton}
+                >
+                  Retake Photo
+                </Button>
+              </>
+            )}
+          </View>
+
+          {/* Owner Input */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              label="Owner"
+              value={ownerName}
+              onChangeText={setOwnerName}
+              mode="outlined"
+              placeholder="e.g., Jane Smith"
+              autoCapitalize="words"
+            />
+          </View>
+
+          {/* Breed Picker */}
+          <View style={styles.inputContainer}>
+            <Button
+              mode="outlined"
+              onPress={() => setBreedDialogVisible(true)}
+              style={styles.breedButton}
+            >
+              {breed} *
+            </Button>
+          </View>
+
+          {/* Location Input */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              label="Where did I meet this dog?"
+              value={metLocationText}
+              onChangeText={setMetLocationText}
+              mode="outlined"
+              placeholder="e.g., Park, Pet Store, Friend's House"
+              autoCapitalize="words"
+            />
+          </View>
+
+          {/* Notes Input */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              label="Notes"
+              value={notes}
+              onChangeText={setNotes}
+              mode="outlined"
+              placeholder="Any notes about this dog..."
+              multiline
+              numberOfLines={4}
+            />
+          </View>
+
+          {/* Action Buttons */}
+          <View style={styles.actionsContainer}>
+            <Button mode="contained" onPress={handleSave} disabled={isSaving} loading={isSaving}>
+              {isEditMode ? 'Save Changes' : 'Save Dog'}
+            </Button>
+
+            <Button mode="outlined" onPress={handleCancel} disabled={isSaving}>
+              Cancel
+            </Button>
+          </View>
+        </KeyboardAvoidingView>
+
+        {/* Breed Selection Dialog */}
+        <Portal>
+          <Dialog visible={breedDialogVisible} onDismiss={() => setBreedDialogVisible(false)}>
+            <Dialog.Title>Select Breed</Dialog.Title>
+            <Dialog.Content>
+              {BREEDS.map((breedOption) => (
+                <List.Item
+                  key={breedOption}
+                  title={breedOption}
+                  right={() =>
+                    breed === breedOption ? (
+                      <Ionicons name="checkmark" size={24} color={theme.colors.primary} />
+                    ) : null
+                  }
+                  onPress={() => {
+                    setBreed(breedOption);
+                    setBreedDialogVisible(false);
+                  }}
+                  style={[
+                    breed === breedOption && {
+                      backgroundColor: theme.colors.primaryContainer,
+                    },
+                  ]}
+                />
+              ))}
+            </Dialog.Content>
+          </Dialog>
+        </Portal>
+
+        {/* Toast Notification */}
+        <Toast
+          message={toastMessage}
+          visible={toastVisible}
+          type={toastType}
+          onHide={() => setToastVisible(false)}
+        />
+      </ScreenContainer>
     </>
   );
 }

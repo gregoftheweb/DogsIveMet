@@ -13,10 +13,7 @@ export default function MyDogScreen() {
         <Text style={styles.title}>My Dog Screen</Text>
 
         <Pressable
-          style={({ pressed }) => [
-            styles.button,
-            pressed && styles.buttonPressed,
-          ]}
+          style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
           onPress={() => router.back()}
         >
           <Text style={styles.buttonText}>Back to Home</Text>

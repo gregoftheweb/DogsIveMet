@@ -5,8 +5,9 @@ This document describes the theme infrastructure for the Dogs I've Met app.
 ## Overview
 
 The app uses React Native Paper (Material Design 3) with a custom theme layer that supports:
+
 - Light mode
-- Dark mode  
+- Dark mode
 - System mode (follows device preference)
 
 Theme mode is persisted to AsyncStorage and will be used by a future Settings screen.
@@ -21,6 +22,7 @@ Defines two Material Design 3 themes:
 - **`darkTheme`**: Comfortable dark mode with adjusted colors for readability
 
 Both themes use:
+
 - Roundness: 12px for consistent border radius
 - Custom color palette optimized for Dogs I've Met branding
 - Full MD3 color system (primary, secondary, tertiary, surfaces, errors, etc.)
@@ -42,10 +44,10 @@ import { useThemeMode } from '@/src/theme/ThemeProvider';
 
 function MyComponent() {
   const { themeMode, setThemeMode, activeTheme } = useThemeMode();
-  
+
   // Switch to dark mode
   setThemeMode('dark');
-  
+
   // Follow system
   setThemeMode('system');
 }
@@ -66,11 +68,7 @@ Consistent layout wrapper for all screens:
 import { ScreenContainer } from '@/src/ui/ScreenContainer';
 
 function MyScreen() {
-  return (
-    <ScreenContainer scroll={true}>
-      {/* Your content */}
-    </ScreenContainer>
-  );
+  return <ScreenContainer scroll={true}>{/* Your content */}</ScreenContainer>;
 }
 ```
 
@@ -93,15 +91,13 @@ import { useTheme, Button, Text } from 'react-native-paper';
 
 function MyComponent() {
   const theme = useTheme();
-  
+
   return (
     <View style={{ backgroundColor: theme.colors.background }}>
       <Text style={{ color: theme.colors.onBackground }}>
         This text automatically adapts to the theme!
       </Text>
-      <Button mode="contained">
-        This button uses theme.colors.primary
-      </Button>
+      <Button mode="contained">This button uses theme.colors.primary</Button>
     </View>
   );
 }
@@ -110,13 +106,15 @@ function MyComponent() {
 ## Color Palette
 
 ### Light Theme
+
 - Primary: #007AFF (iOS blue)
 - Secondary: #5856D6 (purple)
 - Tertiary: #34C759 (green)
 - Background: #f9f9f9
 - Surface: #ffffff
 
-### Dark Theme  
+### Dark Theme
+
 - Primary: #66b3ff (light blue)
 - Secondary: #9896ff (light purple)
 - Tertiary: #66d98a (light green)
@@ -133,7 +131,7 @@ import { SegmentedButtons } from 'react-native-paper';
 
 function SettingsScreen() {
   const { themeMode, setThemeMode } = useThemeMode();
-  
+
   return (
     <SegmentedButtons
       value={themeMode}

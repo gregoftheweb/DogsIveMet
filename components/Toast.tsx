@@ -3,15 +3,8 @@
  * Lightweight implementation without external dependencies.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import { 
-  Animated, 
-  StyleSheet, 
-  Text, 
-  View,
-  Dimensions,
-  Platform,
-} from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Animated, StyleSheet, Text, Platform } from 'react-native';
 
 export interface ToastProps {
   message: string;
@@ -21,19 +14,34 @@ export interface ToastProps {
   onHide?: () => void;
 }
 
-export function Toast({ 
-  message, 
-  visible, 
-  duration = 3000, 
-  type = 'info',
-  onHide,
-}: ToastProps) {
-  const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(50)).current;
+export function Toast({ message, visible, duration = 3000, type = 'info', onHide }: ToastProps) {
+  const [opacity] = useState(() => new Animated.Value(0));
+  const [translateY] = useState(() => new Animated.Value(50));
   const [isShowing, setIsShowing] = useState(false);
+
+  const hideToast = useCallback(() => {
+    Animated.parallel([
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(translateY, {
+        toValue: 50,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setIsShowing(false);
+      if (onHide) {
+        onHide();
+      }
+    });
+  }, [opacity, translateY, onHide]);
 
   useEffect(() => {
     if (visible) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- drives an imperative Animated sequence in response to `visible`; no render-time equivalent exists for triggering animations.
       setIsShowing(true);
       // Show animation
       Animated.parallel([
@@ -58,27 +66,7 @@ export function Toast({
     } else {
       hideToast();
     }
-  }, [visible]);
-
-  const hideToast = () => {
-    Animated.parallel([
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(translateY, {
-        toValue: 50,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      setIsShowing(false);
-      if (onHide) {
-        onHide();
-      }
-    });
-  };
+  }, [visible, duration, hideToast, opacity, translateY]);
 
   if (!isShowing) {
     return null;

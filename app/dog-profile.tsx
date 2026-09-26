@@ -1,23 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  StyleSheet,
-  View,
-  Image,
-  Alert,
-} from 'react-native';
+import { StyleSheet, View, Image, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useFocusEffect } from "expo-router/react-navigation";
-import {
-  Card,
-  Button,
-  IconButton,
-  ActivityIndicator,
-  Appbar,
-  List,
-  useTheme,
-  Text,
-  Surface,
-} from 'react-native-paper';
+import { useFocusEffect } from 'expo-router/react-navigation';
+import { Card, Button, ActivityIndicator, List, useTheme, Text, Surface } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { Dog } from '@/src/types/Dog';
 import { getDogById, deleteDog } from '@/src/storage/dogs';
@@ -29,14 +14,18 @@ import { useDogCounts } from '@/src/state/DogCountsProvider';
 // Format date/time for display
 function formatDateTime(isoDate: string): string {
   const date = new Date(isoDate);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }) + ' at ' + date.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-  });
+  return (
+    date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }) +
+    ' at ' +
+    date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+    })
+  );
 }
 
 export default function DogProfileScreen() {
@@ -72,7 +61,7 @@ export default function DogProfileScreen() {
 
     try {
       const foundDog = await getDogById(id);
-      
+
       if (foundDog) {
         setDog(foundDog);
         setNotFound(false);
@@ -83,10 +72,10 @@ export default function DogProfileScreen() {
         logEvent('DogProfile:load:success', { id, found: false });
       }
     } catch (error) {
-      logError(
-        error instanceof Error ? error : new Error(String(error)),
-        { context: 'DogProfile:load:error', id }
-      );
+      logError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'DogProfile:load:error',
+        id,
+      });
       setDog(null);
       setNotFound(true);
     } finally {
@@ -98,60 +87,44 @@ export default function DogProfileScreen() {
   useFocusEffect(
     useCallback(() => {
       loadDog();
-    }, [loadDog])
+    }, [loadDog]),
   );
 
   // Handle delete
   const handleDelete = () => {
     if (!dog) return;
 
-    Alert.alert(
-      'Delete dog?',
-      'This will remove the saved entry.',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            logEvent('DogProfile:delete:press', { id: dog.id });
-            try {
-              await deleteDog(dog.id);
-              logEvent('DogProfile:delete:success', { id: dog.id });
-              
-              // Refresh counts after delete
-              await refreshCounts();
-              
-              logEvent('Nav:to:DogsList');
-              router.back();
-            } catch (error) {
-              logError(
-                error instanceof Error ? error : new Error(String(error)),
-                { context: 'DogProfile:delete:error', id: dog.id }
-              );
-              Alert.alert(
-                'Delete Failed',
-                'Could not delete the dog. Please try again.',
-                [{ text: 'OK' }]
-              );
-            }
-          },
-        },
-      ]
-    );
-  };
+    Alert.alert('Delete dog?', 'This will remove the saved entry.', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          logEvent('DogProfile:delete:press', { id: dog.id });
+          try {
+            await deleteDog(dog.id);
+            logEvent('DogProfile:delete:success', { id: dog.id });
 
-  // Handle edit
-  const handleEdit = () => {
-    if (!dog) return;
-    logEvent('Nav:to:EditDog', { id: dog.id });
-    router.push({
-      pathname: '/new-dog',
-      params: { mode: 'edit', id: dog.id },
-    });
+            // Refresh counts after delete
+            await refreshCounts();
+
+            logEvent('Nav:to:DogsList');
+            router.back();
+          } catch (error) {
+            logError(error instanceof Error ? error : new Error(String(error)), {
+              context: 'DogProfile:delete:error',
+              id: dog.id,
+            });
+            Alert.alert('Delete Failed', 'Could not delete the dog. Please try again.', [
+              { text: 'OK' },
+            ]);
+          }
+        },
+      },
+    ]);
   };
 
   // Handle back to list
@@ -168,7 +141,10 @@ export default function DogProfileScreen() {
         <ScreenContainer>
           <View style={styles.centerContent}>
             <ActivityIndicator size="large" color={theme.colors.primary} />
-            <Text style={[styles.loadingText, { color: theme.colors.onBackground }]} variant="bodyLarge">
+            <Text
+              style={[styles.loadingText, { color: theme.colors.onBackground }]}
+              variant="bodyLarge"
+            >
               Loading...
             </Text>
           </View>
@@ -185,14 +161,13 @@ export default function DogProfileScreen() {
         <ScreenContainer>
           <View style={styles.centerContent}>
             <Ionicons name="paw-outline" size={64} color={theme.colors.outlineVariant} />
-            <Text style={[styles.notFoundText, { color: theme.colors.onBackground }]} variant="headlineSmall">
+            <Text
+              style={[styles.notFoundText, { color: theme.colors.onBackground }]}
+              variant="headlineSmall"
+            >
               Dog not found.
             </Text>
-            <Button
-              mode="contained"
-              onPress={handleBackToList}
-              style={styles.notFoundButton}
-            >
+            <Button mode="contained" onPress={handleBackToList} style={styles.notFoundButton}>
               Back to list
             </Button>
           </View>
@@ -208,7 +183,10 @@ export default function DogProfileScreen() {
       <ScreenContainer scroll>
         <View style={styles.contentWrapper}>
           {/* Dog Name */}
-          <Text variant="displaySmall" style={[styles.dogName, { color: theme.colors.onBackground }]}>
+          <Text
+            variant="displaySmall"
+            style={[styles.dogName, { color: theme.colors.onBackground }]}
+          >
             {dog.name}
           </Text>
 
@@ -223,9 +201,14 @@ export default function DogProfileScreen() {
                 />
               </View>
             ) : (
-              <Surface style={[styles.photoPlaceholder, { backgroundColor: theme.colors.surfaceVariant }]}>
+              <Surface
+                style={[styles.photoPlaceholder, { backgroundColor: theme.colors.surfaceVariant }]}
+              >
                 <Ionicons name="image-outline" size={48} color={theme.colors.outline} />
-                <Text style={[styles.photoPlaceholderText, { color: theme.colors.outline }]} variant="bodyMedium">
+                <Text
+                  style={[styles.photoPlaceholderText, { color: theme.colors.outline }]}
+                  variant="bodyMedium"
+                >
                   No photo
                 </Text>
               </Surface>

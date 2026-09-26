@@ -15,43 +15,46 @@ export default function MeScreen() {
     <>
       <TopNav />
       <ScreenContainer>
-      <View style={styles.container}>
-        <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.onBackground }]}>
-          Me Screen
-        </Text>
-
-        {/* Theme Toggle Demo */}
-        <View style={styles.themeSection}>
-          <Text variant="titleMedium" style={[styles.sectionTitle, { color: theme.colors.onBackground }]}>
-            Theme Mode
-          </Text>
-          <SegmentedButtons
-            value={themeMode}
-            onValueChange={(value) => setThemeMode(value as 'system' | 'light' | 'dark')}
-            buttons={[
-              { value: 'system', label: 'System' },
-              { value: 'light', label: 'Light' },
-              { value: 'dark', label: 'Dark' },
-            ]}
-            style={styles.segmentedButtons}
-          />
-          <Text 
-            variant="bodySmall" 
-            style={[styles.themeHint, { color: theme.colors.onSurfaceVariant }]}
+        <View style={styles.container}>
+          <Text
+            variant="headlineMedium"
+            style={[styles.title, { color: theme.colors.onBackground }]}
           >
-            This demonstrates the theme infrastructure. A Settings screen would contain this toggle in the final app.
+            Me Screen
           </Text>
-        </View>
 
-        <Button
-          mode="contained"
-          onPress={() => router.back()}
-          style={styles.button}
-        >
-          Back to Home
-        </Button>
-      </View>
-    </ScreenContainer>
+          {/* Theme Toggle Demo */}
+          <View style={styles.themeSection}>
+            <Text
+              variant="titleMedium"
+              style={[styles.sectionTitle, { color: theme.colors.onBackground }]}
+            >
+              Theme Mode
+            </Text>
+            <SegmentedButtons
+              value={themeMode}
+              onValueChange={(value) => setThemeMode(value as 'system' | 'light' | 'dark')}
+              buttons={[
+                { value: 'system', label: 'System' },
+                { value: 'light', label: 'Light' },
+                { value: 'dark', label: 'Dark' },
+              ]}
+              style={styles.segmentedButtons}
+            />
+            <Text
+              variant="bodySmall"
+              style={[styles.themeHint, { color: theme.colors.onSurfaceVariant }]}
+            >
+              This demonstrates the theme infrastructure. A Settings screen would contain this
+              toggle in the final app.
+            </Text>
+          </View>
+
+          <Button mode="contained" onPress={() => router.back()} style={styles.button}>
+            Back to Home
+          </Button>
+        </View>
+      </ScreenContainer>
     </>
   );
 }

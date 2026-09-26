@@ -1,23 +1,12 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  StyleSheet,
-  View,
-  FlatList,
-  RefreshControl,
-  Modal,
-  ScrollView,
-  Alert,
-} from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { StyleSheet, View, FlatList, RefreshControl, Modal, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useFocusEffect } from "expo-router/react-navigation";
+import { useFocusEffect } from 'expo-router/react-navigation';
 import {
   Searchbar,
   Button,
-  Card,
   List,
   IconButton,
-  ActivityIndicator,
-  Appbar,
   useTheme,
   Snackbar,
   Text,
@@ -42,17 +31,16 @@ export default function DogsListScreen() {
   const router = useRouter();
   const theme = useTheme();
   const { refreshCounts } = useDogCounts();
-  
+
   // State
   const [allDogs, setAllDogs] = useState<Dog[]>([]);
-  const [filteredDogs, setFilteredDogs] = useState<Dog[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBreed, setSelectedBreed] = useState('All Breeds');
   const [sortOption, setSortOption] = useState<SortOption>('newest');
   const [refreshing, setRefreshing] = useState(false);
   const [breedModalVisible, setBreedModalVisible] = useState(false);
   const [availableBreeds, setAvailableBreeds] = useState<string[]>(['All Breeds']);
-  
+
   // Undo state
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
   const pendingDeleteRef = useRef<PendingDelete | null>(null);
@@ -75,11 +63,11 @@ export default function DogsListScreen() {
     try {
       const dogs = await getMetDogs();
       setAllDogs(dogs);
-      
+
       // Extract unique breeds
-      const breeds = Array.from(new Set(dogs.map(dog => dog.breed))).sort();
+      const breeds = Array.from(new Set(dogs.map((dog) => dog.breed))).sort();
       setAvailableBreeds(['All Breeds', ...breeds]);
-      
+
       logEvent('DogsList:load:success', { count: dogs.length });
     } catch (error) {
       logError(error instanceof Error ? error : new Error(String(error)), {
@@ -88,33 +76,26 @@ export default function DogsListScreen() {
     }
   }, []);
 
-  // Load on mount
-  useEffect(() => {
-    loadDogs();
-  }, [loadDogs]);
-
-  // Reload on focus
+  // Reload on focus (also covers initial mount)
   useFocusEffect(
     useCallback(() => {
       loadDogs();
-    }, [loadDogs])
+    }, [loadDogs]),
   );
 
   // Filter and sort dogs whenever dependencies change
-  useEffect(() => {
+  const filteredDogs = useMemo(() => {
     let result = [...allDogs];
 
     // Apply breed filter
     if (selectedBreed !== 'All Breeds') {
-      result = result.filter(dog => dog.breed === selectedBreed);
+      result = result.filter((dog) => dog.breed === selectedBreed);
     }
 
     // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      result = result.filter(dog => 
-        dog.name.toLowerCase().includes(query)
-      );
+      result = result.filter((dog) => dog.name.toLowerCase().includes(query));
     }
 
     // Sort by date
@@ -124,7 +105,7 @@ export default function DogsListScreen() {
       return sortOption === 'newest' ? dateB - dateA : dateA - dateB;
     });
 
-    setFilteredDogs(result);
+    return result;
   }, [allDogs, searchQuery, selectedBreed, sortOption]);
 
   // Pull to refresh
@@ -183,37 +164,36 @@ export default function DogsListScreen() {
   };
 
   // Commit pending delete to storage
-  const commitDelete = useCallback(async (dog: Dog) => {
-    logEvent('DogsList:delete:commit', { id: dog.id });
-    try {
-      await deleteDog(dog.id);
-      // Reload list from storage to ensure consistency
-      await loadDogs();
-      // Refresh counts after delete
-      await refreshCounts();
-    } catch (error) {
-      logError(error instanceof Error ? error : new Error(String(error)), {
-        context: 'DogsList:delete:error',
-        id: dog.id,
-      });
-      // On error, reload from storage and show alert
-      await loadDogs();
-      Alert.alert(
-        'Delete Failed',
-        'Could not delete the dog. The list has been refreshed.',
-        [{ text: 'OK' }]
-      );
-    }
-  }, [loadDogs, refreshCounts]);
+  const commitDelete = useCallback(
+    async (dog: Dog) => {
+      logEvent('DogsList:delete:commit', { id: dog.id });
+      try {
+        await deleteDog(dog.id);
+        // Reload list from storage to ensure consistency
+        await loadDogs();
+        // Refresh counts after delete
+        await refreshCounts();
+      } catch (error) {
+        logError(error instanceof Error ? error : new Error(String(error)), {
+          context: 'DogsList:delete:error',
+          id: dog.id,
+        });
+        // On error, reload from storage and show alert
+        await loadDogs();
+        Alert.alert('Delete Failed', 'Could not delete the dog. The list has been refreshed.', [
+          { text: 'OK' },
+        ]);
+      }
+    },
+    [loadDogs, refreshCounts],
+  );
 
   // Handle delete press (with long-press)
-  const handleDeletePress = useCallback((dog: Dog) => {
-    logEvent('DogsList:delete:press', { id: dog.id });
+  const handleDeletePress = useCallback(
+    (dog: Dog) => {
+      logEvent('DogsList:delete:press', { id: dog.id });
 
-    Alert.alert(
-      'Delete dog?',
-      `Remove "${dog.name}" from your list?`,
-      [
+      Alert.alert('Delete dog?', `Remove "${dog.name}" from your list?`, [
         {
           text: 'Cancel',
           style: 'cancel',
@@ -229,7 +209,7 @@ export default function DogsListScreen() {
             }
 
             // Remove from visible list (optimistic UI)
-            setAllDogs(prev => prev.filter(d => d.id !== dog.id));
+            setAllDogs((prev) => prev.filter((d) => d.id !== dog.id));
 
             // Set up undo timer (5 seconds)
             const timer = setTimeout(() => {
@@ -243,9 +223,10 @@ export default function DogsListScreen() {
             pendingDeleteRef.current = pending;
           },
         },
-      ]
-    );
-  }, [commitDelete]);
+      ]);
+    },
+    [commitDelete],
+  );
 
   // Handle undo
   const handleUndo = useCallback(() => {
@@ -257,8 +238,8 @@ export default function DogsListScreen() {
     clearTimeout(pendingDelete.timer);
 
     // Restore dog to list
-    setAllDogs(prev => {
-      const exists = prev.find(d => d.id === pendingDelete.dog.id);
+    setAllDogs((prev) => {
+      const exists = prev.find((d) => d.id === pendingDelete.dog.id);
       if (exists) {
         return prev; // Already in list somehow
       }
@@ -268,7 +249,7 @@ export default function DogsListScreen() {
     // Clear pending delete
     setPendingDelete(null);
     pendingDeleteRef.current = null;
-    
+
     // Refresh counts in case it was a "my dog"
     refreshCounts();
   }, [pendingDelete, refreshCounts]);
@@ -276,10 +257,10 @@ export default function DogsListScreen() {
   // Format date for display
   const formatDate = (isoDate: string): string => {
     const date = new Date(isoDate);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
   };
 
@@ -320,7 +301,15 @@ export default function DogsListScreen() {
             </Button>
           </View>
 
-          <View style={[styles.footer, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.outlineVariant }]}>
+          <View
+            style={[
+              styles.footer,
+              {
+                backgroundColor: theme.colors.surface,
+                borderTopColor: theme.colors.outlineVariant,
+              },
+            ]}
+          >
             <Button
               mode="contained"
               onPress={handleHomePress}
@@ -342,165 +331,163 @@ export default function DogsListScreen() {
     <>
       <TopNav />
       <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      {/* Controls */}
-      <Surface style={[styles.controls, { backgroundColor: theme.colors.surface }]}>
-        {/* Search Input */}
-        <Searchbar
-          placeholder="Search by name"
-          value={searchQuery}
-          onChangeText={handleSearchChange}
-          style={[styles.searchbar, { backgroundColor: theme.colors.surfaceVariant }]}
-          iconColor={theme.colors.onSurfaceVariant}
-          placeholderTextColor={theme.colors.onSurfaceVariant}
-          inputStyle={{ color: theme.colors.onSurface }}
-          accessibilityLabel="Search dogs by name"
-          accessibilityHint="Enter a dog's name to filter the list"
-        />
+        {/* Controls */}
+        <Surface style={[styles.controls, { backgroundColor: theme.colors.surface }]}>
+          {/* Search Input */}
+          <Searchbar
+            placeholder="Search by name"
+            value={searchQuery}
+            onChangeText={handleSearchChange}
+            style={[styles.searchbar, { backgroundColor: theme.colors.surfaceVariant }]}
+            iconColor={theme.colors.onSurfaceVariant}
+            placeholderTextColor={theme.colors.onSurfaceVariant}
+            inputStyle={{ color: theme.colors.onSurface }}
+            accessibilityLabel="Search dogs by name"
+            accessibilityHint="Enter a dog's name to filter the list"
+          />
 
-        {/* Breed Filter and Sort */}
-        <View style={styles.filterRow}>
-          <Button
-            mode="outlined"
-            onPress={() => setBreedModalVisible(true)}
-            style={styles.filterButton}
-            labelStyle={styles.filterButtonLabel}
-            icon="filter-variant"
-          >
-            {selectedBreed}
-          </Button>
+          {/* Breed Filter and Sort */}
+          <View style={styles.filterRow}>
+            <Button
+              mode="outlined"
+              onPress={() => setBreedModalVisible(true)}
+              style={styles.filterButton}
+              labelStyle={styles.filterButtonLabel}
+              icon="filter-variant"
+            >
+              {selectedBreed}
+            </Button>
 
-          <Button
-            mode="outlined"
-            onPress={handleSortToggle}
-            style={styles.sortButton}
-            labelStyle={styles.filterButtonLabel}
-            icon={sortOption === 'newest' ? 'arrow-down' : 'arrow-up'}
-          >
-            {sortOption === 'newest' ? 'Newest' : 'Oldest'}
-          </Button>
-        </View>
-      </Surface>
-
-      {/* List or No Results */}
-      {showNoResults ? (
-        <View style={styles.noResultsContainer}>
-          <Ionicons name="search-outline" size={48} color={theme.colors.outlineVariant} />
-          <Paragraph style={[styles.noResultsText, { color: theme.colors.onSurfaceVariant }]}>
-            No matches found.
-          </Paragraph>
-          <Button
-            mode="contained"
-            onPress={handleClearFilters}
-            style={styles.clearFiltersButton}
-            icon="refresh"
-          >
-            Clear filters
-          </Button>
-        </View>
-      ) : (
-        <FlatList
-          data={filteredDogs}
-          renderItem={renderDogRow}
-          keyExtractor={(item) => item.id}
-          style={styles.list}
-          contentContainerStyle={styles.listContent}
-          refreshControl={
-            <RefreshControl 
-              refreshing={refreshing} 
-              onRefresh={onRefresh}
-              tintColor={theme.colors.primary}
-            />
-          }
-        />
-      )}
-
-      {/* Undo Snackbar */}
-      <Snackbar
-        visible={!!pendingDelete}
-        onDismiss={() => {
-          // Simply hide the snackbar when swiped away
-          // The timer in handleDeletePress will still auto-commit the delete
-        }}
-        duration={5000}
-        action={{
-          label: 'Undo',
-          onPress: handleUndo,
-          labelStyle: styles.undoActionLabel,
-        }}
-        style={styles.snackbar}
-        wrapperStyle={styles.snackbarWrapper}
-      >
-        <Text style={styles.snackbarText}>
-          {pendingDelete && `Deleted "${pendingDelete.dog.name}"`}
-        </Text>
-      </Snackbar>
-
-      {/* Footer */}
-      <View style={[styles.footer, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.outlineVariant }]}>
-        <Button
-          mode="contained"
-          onPress={handleHomePress}
-          style={styles.homeButton}
-          icon="home"
-        >
-          Home
-        </Button>
-      </View>
-
-      {/* Breed Filter Modal */}
-      <Modal
-        visible={breedModalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setBreedModalVisible(false)}
-      >
-        <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
-          <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
-            <View style={[styles.modalHeader, { borderBottomColor: theme.colors.outlineVariant }]}>
-              <Text style={[styles.modalTitle, { color: theme.colors.onSurface }]}>
-                Filter by Breed
-              </Text>
-              <IconButton
-                icon="close"
-                onPress={() => setBreedModalVisible(false)}
-                accessibilityLabel="Close breed filter"
-              />
-            </View>
-            <ScrollView style={styles.modalScroll}>
-              {availableBreeds.map((breed) => {
-                const isSelected = selectedBreed === breed;
-                return (
-                  <List.Item
-                    key={breed}
-                    title={breed}
-                    onPress={() => handleBreedSelect(breed)}
-                    style={[
-                      styles.breedOption,
-                      isSelected && styles.breedOptionSelected,
-                      isSelected && { backgroundColor: theme.colors.primaryContainer },
-                    ]}
-                    titleStyle={[
-                      styles.breedOptionText,
-                      isSelected && styles.breedOptionTextSelected,
-                      isSelected && { color: theme.colors.primary },
-                    ]}
-                    right={(props) =>
-                      isSelected ? (
-                        <List.Icon
-                          {...props}
-                          icon="check"
-                          color={theme.colors.primary}
-                        />
-                      ) : null
-                    }
-                  />
-                );
-              })}
-            </ScrollView>
+            <Button
+              mode="outlined"
+              onPress={handleSortToggle}
+              style={styles.sortButton}
+              labelStyle={styles.filterButtonLabel}
+              icon={sortOption === 'newest' ? 'arrow-down' : 'arrow-up'}
+            >
+              {sortOption === 'newest' ? 'Newest' : 'Oldest'}
+            </Button>
           </View>
+        </Surface>
+
+        {/* List or No Results */}
+        {showNoResults ? (
+          <View style={styles.noResultsContainer}>
+            <Ionicons name="search-outline" size={48} color={theme.colors.outlineVariant} />
+            <Paragraph style={[styles.noResultsText, { color: theme.colors.onSurfaceVariant }]}>
+              No matches found.
+            </Paragraph>
+            <Button
+              mode="contained"
+              onPress={handleClearFilters}
+              style={styles.clearFiltersButton}
+              icon="refresh"
+            >
+              Clear filters
+            </Button>
+          </View>
+        ) : (
+          <FlatList
+            data={filteredDogs}
+            renderItem={renderDogRow}
+            keyExtractor={(item) => item.id}
+            style={styles.list}
+            contentContainerStyle={styles.listContent}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={theme.colors.primary}
+              />
+            }
+          />
+        )}
+
+        {/* Undo Snackbar */}
+        <Snackbar
+          visible={!!pendingDelete}
+          onDismiss={() => {
+            // Simply hide the snackbar when swiped away
+            // The timer in handleDeletePress will still auto-commit the delete
+          }}
+          duration={5000}
+          action={{
+            label: 'Undo',
+            onPress: handleUndo,
+            labelStyle: styles.undoActionLabel,
+          }}
+          style={styles.snackbar}
+          wrapperStyle={styles.snackbarWrapper}
+        >
+          <Text style={styles.snackbarText}>
+            {pendingDelete && `Deleted "${pendingDelete.dog.name}"`}
+          </Text>
+        </Snackbar>
+
+        {/* Footer */}
+        <View
+          style={[
+            styles.footer,
+            { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.outlineVariant },
+          ]}
+        >
+          <Button mode="contained" onPress={handleHomePress} style={styles.homeButton} icon="home">
+            Home
+          </Button>
         </View>
-      </Modal>
-    </View>
+
+        {/* Breed Filter Modal */}
+        <Modal
+          visible={breedModalVisible}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setBreedModalVisible(false)}
+        >
+          <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
+            <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
+              <View
+                style={[styles.modalHeader, { borderBottomColor: theme.colors.outlineVariant }]}
+              >
+                <Text style={[styles.modalTitle, { color: theme.colors.onSurface }]}>
+                  Filter by Breed
+                </Text>
+                <IconButton
+                  icon="close"
+                  onPress={() => setBreedModalVisible(false)}
+                  accessibilityLabel="Close breed filter"
+                />
+              </View>
+              <ScrollView style={styles.modalScroll}>
+                {availableBreeds.map((breed) => {
+                  const isSelected = selectedBreed === breed;
+                  return (
+                    <List.Item
+                      key={breed}
+                      title={breed}
+                      onPress={() => handleBreedSelect(breed)}
+                      style={[
+                        styles.breedOption,
+                        isSelected && styles.breedOptionSelected,
+                        isSelected && { backgroundColor: theme.colors.primaryContainer },
+                      ]}
+                      titleStyle={[
+                        styles.breedOptionText,
+                        isSelected && styles.breedOptionTextSelected,
+                        isSelected && { color: theme.colors.primary },
+                      ]}
+                      right={(props) =>
+                        isSelected ? (
+                          <List.Icon {...props} icon="check" color={theme.colors.primary} />
+                        ) : null
+                      }
+                    />
+                  );
+                })}
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+      </View>
     </>
   );
 }
