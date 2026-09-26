@@ -1,11 +1,21 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import type { TextInput as RNTextInput } from 'react-native';
-import { MD3Theme, TextInput, useTheme } from 'react-native-paper';
+import { IconButton, TextInput } from 'react-native-paper';
 import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
 
 type Mode = 'idle' | 'listening' | 'editing';
 
 const DIDNT_CATCH_MESSAGE = "Didn't catch that — try again";
+
+// The mic button is intentionally larger than a standard input icon and
+// overlaps the field's right edge rather than sitting inside it (design
+// request). Sized from IconButton's own container-size formula
+// (icon size + 2x its internal padding) so the overlap math below is exact.
+const MIC_ICON_SIZE = 34;
+const MIC_BUTTON_PADDING = 8;
+const MIC_BUTTON_DIAMETER = MIC_ICON_SIZE + MIC_BUTTON_PADDING * 2;
+const MIC_BUTTON_COLOR = '#0B3D91';
 
 function formatTranscript(transcript: string): string {
   return transcript
@@ -32,7 +42,6 @@ export function VoiceInputField({
   placeholder,
   onError,
 }: VoiceInputFieldProps) {
-  const theme = useTheme<MD3Theme>();
   const [mode, setMode] = useState<Mode>('idle');
   const [interimTranscript, setInterimTranscript] = useState('');
   const inputRef = useRef<RNTextInput>(null);
@@ -123,34 +132,58 @@ export function VoiceInputField({
   const displayValue = mode === 'listening' && interimTranscript ? interimTranscript : value;
 
   return (
-    <TextInput
-      ref={inputRef}
-      label={label}
-      value={displayValue}
-      onChangeText={onChangeText}
-      onBlur={handleBlur}
-      mode="outlined"
-      placeholder={placeholder}
-      autoCapitalize="words"
-      editable={mode === 'editing'}
-      style={mode === 'listening' && interimTranscript ? { opacity: 0.6 } : undefined}
-      left={
-        <TextInput.Icon
-          icon="keyboard-outline"
-          forceTextInputFocus={false}
-          onPress={handleKeyboardPress}
-          accessibilityLabel={`Type ${label} manually`}
-        />
-      }
-      right={
-        <TextInput.Icon
-          icon={mode === 'listening' ? 'microphone' : 'microphone-outline'}
-          forceTextInputFocus={false}
-          color={mode === 'listening' ? theme.colors.primary : undefined}
-          onPress={handleMicPress}
-          accessibilityLabel={mode === 'listening' ? 'Stop listening' : `Speak to fill ${label}`}
-        />
-      }
-    />
+    <View style={styles.container}>
+      <TextInput
+        ref={inputRef}
+        label={label}
+        value={displayValue}
+        onChangeText={onChangeText}
+        onBlur={handleBlur}
+        mode="outlined"
+        placeholder={placeholder}
+        autoCapitalize="words"
+        editable={mode === 'editing'}
+        style={mode === 'listening' && interimTranscript ? { opacity: 0.6 } : undefined}
+        left={
+          <TextInput.Icon
+            icon="keyboard-outline"
+            forceTextInputFocus={false}
+            onPress={handleKeyboardPress}
+            accessibilityLabel={`Type ${label} manually`}
+          />
+        }
+        // Renders nothing (Paper's adornment system only renders elements
+        // whose type is TextInputIcon/TextInputAffix — a plain View is
+        // silently skipped) but still reserves its width as right padding,
+        // so typed/spoken text doesn't run underneath the overlapping mic
+        // button below.
+        right={<View style={{ width: MIC_BUTTON_DIAMETER / 2 }} />}
+      />
+      <IconButton
+        icon={mode === 'listening' ? 'microphone' : 'microphone-outline'}
+        mode="contained"
+        containerColor={MIC_BUTTON_COLOR}
+        iconColor="#fff"
+        size={MIC_ICON_SIZE}
+        onPress={handleMicPress}
+        accessibilityLabel={mode === 'listening' ? 'Stop listening' : `Speak to fill ${label}`}
+        style={styles.micButton}
+      />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'relative',
+  },
+  micButton: {
+    position: 'absolute',
+    top: '50%',
+    right: -(MIC_BUTTON_DIAMETER / 2),
+    marginTop: -(MIC_BUTTON_DIAMETER / 2),
+    margin: 0,
+    zIndex: 1,
+    elevation: 4,
+  },
+});
