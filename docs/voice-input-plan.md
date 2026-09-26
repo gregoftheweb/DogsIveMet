@@ -27,11 +27,9 @@ It's a native module → **requires a custom dev client build**, not plain Expo 
 ### Config changes needed (`app.json`)
 
 - Add `"expo-speech-recognition"` to `plugins`, with:
-  - `microphonePermission`: iOS mic usage string
-  - `speechRecognitionPermission`: iOS speech recognition usage string
-  - `androidSpeechRecognitionServicePackages` if we want to lock to on-device recognition (optional)
   - `microphonePermission`: "DogsIveMet uses your microphone so you can dictate fields instead of typing."
   - `speechRecognitionPermission`: "DogsIveMet uses speech recognition to turn what you say into text for the field you're filling in."
+  - `androidSpeechRecognitionServicePackages` if we want to lock to on-device recognition (optional) — not set
 - iOS: the plugin injects `NSMicrophoneUsageDescription` and `NSSpeechRecognitionUsageDescription` automatically from the permission strings above — no manual `ios.infoPlist` edits needed.
 - Android: `RECORD_AUDIO` permission already present.
 
