@@ -71,6 +71,7 @@ export default function NewDogScreen() {
   const [breed, setBreed] = useState('Unknown');
   const [photoUri, setPhotoUri] = useState<string | undefined>(undefined);
   const [metLocationText, setMetLocationText] = useState('');
+  const [ownerName, setOwnerName] = useState('');
   const [notes, setNotes] = useState('');
   const [breedDialogVisible, setBreedDialogVisible] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -84,6 +85,7 @@ export default function NewDogScreen() {
     breed: 'Unknown',
     photoUri: undefined as string | undefined,
     metLocationText: '',
+    ownerName: '',
     notes: '',
   });
 
@@ -100,6 +102,7 @@ export default function NewDogScreen() {
       breed !== initialValues.breed ||
       photoUri !== initialValues.photoUri ||
       metLocationText !== initialValues.metLocationText ||
+      ownerName !== initialValues.ownerName ||
       notes !== initialValues.notes
     );
   };
@@ -124,14 +127,16 @@ export default function NewDogScreen() {
         setBreed(foundDog.breed);
         setPhotoUri(foundDog.photoUri);
         setMetLocationText(foundDog.metLocationText || '');
+        setOwnerName(foundDog.ownerName || '');
         setNotes(foundDog.notes || '');
-        
+
         // Store initial values for change detection
         setInitialValues({
           name: foundDog.name,
           breed: foundDog.breed,
           photoUri: foundDog.photoUri,
           metLocationText: foundDog.metLocationText || '',
+          ownerName: foundDog.ownerName || '',
           notes: foundDog.notes || '',
         });
         
@@ -266,6 +271,7 @@ export default function NewDogScreen() {
           breed,
           photoUri: photoUri || undefined,
           metLocationText: metLocationText.trim() || undefined,
+          ownerName: ownerName.trim() || undefined,
           notes: notes.trim() || undefined,
           // Preserve original timestamps (updatedAt will be set by updateDog)
           metAt: existingDog.metAt,
@@ -305,6 +311,7 @@ export default function NewDogScreen() {
           breed,
           photoUri: photoUri || undefined,
           metLocationText: metLocationText.trim() || undefined,
+          ownerName: ownerName.trim() || undefined,
           notes: notes.trim() || undefined,
           metAt: now,
           createdAt: now,
@@ -495,6 +502,18 @@ export default function NewDogScreen() {
               </Button>
             </>
           )}
+        </View>
+
+        {/* Owner Input */}
+        <View style={styles.inputContainer}>
+          <TextInput
+            label="Owner"
+            value={ownerName}
+            onChangeText={setOwnerName}
+            mode="outlined"
+            placeholder="e.g., Jane Smith"
+            autoCapitalize="words"
+          />
         </View>
 
         {/* Breed Picker */}

@@ -4,6 +4,7 @@ export interface Dog {
   breed: string;
   photoUri?: string;
   metLocationText?: string;
+  ownerName?: string;
   notes?: string;
   metAt: string; // ISO datetime string
   createdAt: string; // ISO datetime string
