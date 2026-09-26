@@ -127,6 +127,16 @@ export default function DogProfileScreen() {
     ]);
   };
 
+  // Handle edit
+  const handleEdit = () => {
+    if (!dog) return;
+    logEvent('Nav:to:EditDog', { id: dog.id });
+    router.push({
+      pathname: '/new-dog',
+      params: { mode: 'edit', id: dog.id },
+    });
+  };
+
   // Handle back to list
   const handleBackToList = () => {
     logEvent('Nav:to:DogsList');
@@ -244,6 +254,17 @@ export default function DogProfileScreen() {
             />
           </List.Section>
 
+          {/* Edit Button */}
+          <Button
+            mode="outlined"
+            icon="pencil-outline"
+            onPress={handleEdit}
+            style={styles.editButton}
+            labelStyle={styles.editButtonLabel}
+          >
+            Edit
+          </Button>
+
           {/* Delete Button */}
           <Button
             mode="outlined"
@@ -313,8 +334,17 @@ const styles = StyleSheet.create({
   detailsSection: {
     marginBottom: 32,
   },
-  deleteButton: {
+  editButton: {
     marginTop: 16,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  editButtonLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  deleteButton: {
+    marginTop: 12,
     borderRadius: 10,
     borderWidth: 1,
   },
