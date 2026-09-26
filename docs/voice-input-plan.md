@@ -1,5 +1,7 @@
 # Voice Input Implementation Plan
 
+**Status: done**, confirmed working on a real device (Sept 2026). Only §9 (AdMob banner) remains, and it's an explicitly separate Phase 2.
+
 Goal: speech-to-text entry for **Dog Name**, **Where we met**, and a new **Owner Name** field. Each field has two buttons: a primary **mic** button (tap → speak → auto-stops on silence → on-device speech recognition transcribes the words → transcript replaces the field's text) and a secondary **keyboard** button (tap → field becomes editable and focuses, keyboard opens, user types instead). Target flow for voice is tap → speak → tap → speak → tap → speak, back to back, no friction.
 
 ## 1. Data model change: add Owner Name
@@ -93,8 +95,8 @@ Single shared component takes props: `value`, `onChangeText`, `label`, `placehol
 1. ✅ Add `ownerName` to type/storage/form/profile (no voice yet)
 2. ✅ Add `expo-speech-recognition` config plugin to `app.json`
 3. ✅ EAS Android development build kicked off and finished (`expo-dev-client` install was a prerequisite, done along the way)
-4. ✅ Built `VoiceInputField` component; verified the read-only/edit/blur cycle and mode exclusivity in-browser (web fallback), but the actual mic/speech-to-text path is unverified — needs the real device with the dev build installed
-5. Wire into the three fields — done as part of step 4. Remaining: install the dev build on a real device, run `expo start --dev-client`, and iterate on real-device feel (auto-stop timing, error states) per §6
+4. ✅ Built `VoiceInputField` component; verified the read-only/edit/blur cycle and mode exclusivity in-browser (web fallback)
+5. ✅ Wired into the three fields; installed on a real Android device via the dev-client build and confirmed working — tap→speak→tap flow across Name/Owner/Location behaves correctly, per Greg
 
 ## 8. Square aspect ratio phones
 
@@ -102,7 +104,7 @@ Single shared component takes props: `value`, `onChangeText`, `label`, `placehol
 
 - **Priority order, top to bottom**: Name → Photo → Owner → Breed → Location → Notes → Save/Cancel → Ad banner (Phase 2) — same order as §4, confirmed. On a square-ish screen, Name/Photo/Owner/Breed/Location should still fit above or just at the fold; Notes, Save/Cancel, and the ad banner are explicitly lowest priority and **allowed to fall below the fold on square screens** — scrolling to reach them is acceptable, confirmed.
 - No conditional aspect-ratio branching in the component logic is planned for now — since the layout already scrolls and already orders content this way, forcing a different layout for square vs. portrait would be added complexity without a concrete problem to solve yet.
-- Verification step (added to §6 testing plan): actually render the form on a near-1:1 window/emulator and eyeball it — confirm nothing overlaps or clips, and that reaching Notes via scroll still feels normal rather than broken. If something looks genuinely bad (not just "lower down the screen"), that's the trigger to revisit with real conditional logic (e.g. `useWindowDimensions()` to detect a square-ish ratio and shrink the photo preview or tighten `marginBottom` spacing) — not doing that preemptively.
+- **✅ Verified** — Greg tested on a real square-screen device; also spot-checked with a constrained 700×700 web viewport, which matched: form scrolls cleanly, nothing overlaps or clips, Notes/Save/Cancel fall below the fold as designed. No conditional aspect-ratio logic needed.
 
 ## 9. Out of scope for this plan: AdMob banner (Phase 2)
 
