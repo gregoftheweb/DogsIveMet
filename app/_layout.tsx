@@ -77,7 +77,7 @@ function RootLayoutNav() {
           <Stack.Screen name="dogs-list" options={{ headerShown: false }} />
           <Stack.Screen name="dog-profile" options={{ headerShown: false }} />
           <Stack.Screen name="my-dog" options={{ headerShown: false }} />
-          <Stack.Screen name="me" options={{ headerShown: false }} />
+          <Stack.Screen name="settings" options={{ headerShown: false }} />
           <Stack.Screen name="my-dogs-list" options={{ headerShown: false }} />
         </Stack>
       </NavigationThemeProvider>

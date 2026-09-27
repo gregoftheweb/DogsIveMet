@@ -15,7 +15,7 @@ export const ROUTES = {
   new: '/new-dog' as Href,
   list: '/dogs-list' as Href,
   my: '/my-dogs-list' as Href,
-  me: '/me' as Href,
+  settings: '/settings' as Href,
 } as const;
 
 function keyFromPathname(pathname: string): NavKey {

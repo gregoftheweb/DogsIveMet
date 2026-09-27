@@ -47,6 +47,54 @@ export const lightTheme = {
 };
 
 /**
+ * Highlight color presets. These override the theme's primary/accent
+ * colors on top of either lightTheme or darkTheme, independent of the
+ * light/dark/system mode. Shared naming + hex values with MarkDownGonzo's
+ * accent-swap system and TextToSpeechGonzo's theme presets, for cross-app
+ * consistency ("lambo" is green there too, not a blue).
+ */
+export type AccentColor = 'tron' | 'mclaren' | 'ferrari' | 'lambo';
+
+interface AccentDefinition {
+  label: string;
+  color: string;
+  /** Text/icon color to use on top of `color` — chosen per-swatch for contrast. */
+  onColor: string;
+}
+
+export const ACCENT_COLORS: Record<AccentColor, AccentDefinition> = {
+  tron: { label: 'Tron Blue', color: '#23c8ff', onColor: '#00131a' },
+  mclaren: { label: 'McLaren Orange', color: '#ff8700', onColor: '#1a0d00' },
+  ferrari: { label: 'Ferrari Red', color: '#ff3245', onColor: '#ffffff' },
+  lambo: { label: 'Lambo Green', color: '#68dc45', onColor: '#0d2606' },
+};
+
+export const DEFAULT_ACCENT: AccentColor = 'tron';
+
+/**
+ * Applies an accent preset to a base theme's primary-family colors, leaving
+ * surfaces/background/secondary/tertiary/etc. from the base light/dark
+ * theme untouched.
+ */
+export function applyAccent<T extends typeof lightTheme | typeof darkTheme>(
+  baseTheme: T,
+  accent: AccentColor
+): T {
+  const { color, onColor } = ACCENT_COLORS[accent];
+  return {
+    ...baseTheme,
+    colors: {
+      ...baseTheme.colors,
+      primary: color,
+      onPrimary: onColor,
+      primaryContainer: color,
+      onPrimaryContainer: onColor,
+      inversePrimary: color,
+    },
+  };
+}
+
+/**
  * Dark theme - comfortable for low-light viewing
  */
 export const darkTheme = {

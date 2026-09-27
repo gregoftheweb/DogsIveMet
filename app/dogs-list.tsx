@@ -3,7 +3,6 @@ import { StyleSheet, View, FlatList, RefreshControl, Modal, ScrollView, Alert } 
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from 'expo-router/react-navigation';
 import {
-  Searchbar,
   Button,
   List,
   IconButton,
@@ -19,6 +18,8 @@ import { getMetDogs, deleteDog } from '@/src/storage/dogs';
 import { logEvent, logError } from '@/src/utils/logger';
 import { TopNav } from '@/src/ui/TopNav';
 import { useDogCounts } from '@/src/state/DogCountsProvider';
+import { VoiceInputField } from '@/src/ui/VoiceInputField';
+import { Toast } from '@/components/Toast';
 
 type SortOption = 'newest' | 'oldest';
 
@@ -44,6 +45,10 @@ export default function DogsListScreen() {
   // Undo state
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
   const pendingDeleteRef = useRef<PendingDelete | null>(null);
+
+  // Voice input error feedback
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   // Log screen lifecycle
   useEffect(() => {
@@ -334,16 +339,14 @@ export default function DogsListScreen() {
         {/* Controls */}
         <Surface style={[styles.controls, { backgroundColor: theme.colors.surface }]}>
           {/* Search Input */}
-          <Searchbar
-            placeholder="Search by name"
+          <VoiceInputField
+            label="Search by name"
             value={searchQuery}
             onChangeText={handleSearchChange}
-            style={[styles.searchbar, { backgroundColor: theme.colors.surfaceVariant }]}
-            iconColor={theme.colors.onSurfaceVariant}
-            placeholderTextColor={theme.colors.onSurfaceVariant}
-            inputStyle={{ color: theme.colors.onSurface }}
-            accessibilityLabel="Search dogs by name"
-            accessibilityHint="Enter a dog's name to filter the list"
+            onError={(message) => {
+              setToastMessage(message);
+              setToastVisible(true);
+            }}
           />
 
           {/* Breed Filter and Sort */}
@@ -424,6 +427,14 @@ export default function DogsListScreen() {
           </Text>
         </Snackbar>
 
+        {/* Voice Input Error Toast */}
+        <Toast
+          message={toastMessage}
+          visible={toastVisible}
+          type="error"
+          onHide={() => setToastVisible(false)}
+        />
+
         {/* Footer */}
         <View
           style={[
@@ -501,9 +512,6 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 12,
     gap: 12,
-  },
-  searchbar: {
-    borderRadius: 8,
   },
   filterRow: {
     flexDirection: 'row',
