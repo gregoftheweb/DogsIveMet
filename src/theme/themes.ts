@@ -78,7 +78,7 @@ export const DEFAULT_ACCENT: AccentColor = 'tron';
  */
 export function applyAccent<T extends typeof lightTheme | typeof darkTheme>(
   baseTheme: T,
-  accent: AccentColor
+  accent: AccentColor,
 ): T {
   const { color, onColor } = ACCENT_COLORS[accent];
   return {
