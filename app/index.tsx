@@ -61,11 +61,11 @@ export default function HomeScreen() {
 
             <Button
               mode="outlined"
-              onPress={() => router.push('/me')}
+              onPress={() => router.push('/settings')}
               style={styles.button}
               contentStyle={styles.buttonContent}
             >
-              Me
+              Settings
             </Button>
           </View>
 
