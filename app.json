@@ -8,12 +8,15 @@
     "scheme": "dogsivemet",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "icon": "./assets/images/icon.png",
+      "supportsTablet": true,
+      "bundleIdentifier": "com.columbiafoundry.dogsivemet"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "monochromeImage": "./assets/images/android-icon-monochrome.png",
+        "backgroundColor": "#173465"
       },
       "predictiveBackGestureEnabled": false,
       "permissions": ["android.permission.RECORD_AUDIO"],
@@ -44,9 +47,10 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/columbia-foundry-logo.png",
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#000000",
+          "imageWidth": 240
         }
       ],
       "expo-status-bar",

@@ -13,6 +13,7 @@ import { PaperProvider } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { useColorScheme } from '@/components/useColorScheme';
+import { AnimatedSplashOverlay } from '@/components/AnimatedSplashOverlay';
 import { ThemeProvider, useThemeMode } from '@/src/theme/ThemeProvider';
 import { DogCountsProvider } from '@/src/state/DogCountsProvider';
 
@@ -40,20 +41,11 @@ export default function RootLayout() {
     if (error) throw error;
   }, [error]);
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
   return (
     <ThemeProvider>
       <DogCountsProvider>
-        <RootLayoutNav />
+        {loaded ? <RootLayoutNav /> : null}
+        <AnimatedSplashOverlay />
       </DogCountsProvider>
     </ThemeProvider>
   );
