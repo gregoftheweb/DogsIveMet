@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
+import { adChoicesAvailable, showAdChoices, useAdsState } from '@/src/ads/ads';
 import { StyleSheet, View, Pressable } from 'react-native';
-import { useRouter } from 'expo-router';
 import { Button, Text, useTheme, SegmentedButtons } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenContainer } from '@/src/ui/ScreenContainer';
@@ -12,13 +14,27 @@ const ACCENT_ORDER: AccentColor[] = ['tron', 'mclaren', 'ferrari', 'lambo'];
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const adsState = useAdsState();
+  const [hasAdChoices, setHasAdChoices] = useState(false);
+  useFocusEffect(
+    useCallback(() => {
+      if (adsState === 'starting') return;
+      let active = true;
+      void adChoicesAvailable().then((available) => {
+        if (active) setHasAdChoices(available);
+      });
+      return () => {
+        active = false;
+      };
+    }, [adsState]),
+  );
   const theme = useTheme();
   const { themeMode, setThemeMode, accentColor, setAccentColor } = useThemeMode();
 
   return (
     <>
       <TopNav />
-      <ScreenContainer>
+      <ScreenContainer scroll>
         <View style={styles.container}>
           <Text
             variant="headlineMedium"
@@ -93,6 +109,19 @@ export default function SettingsScreen() {
               })}
             </View>
           </View>
+
+          <Button
+            onPress={() =>
+              void WebBrowser.openBrowserAsync(
+                'https://columbiafoundry.com/privacy/dogs-ive-met.html',
+              )
+            }
+          >
+            Privacy policy
+          </Button>
+          {hasAdChoices && (
+            <Button onPress={() => void showAdChoices()}>Privacy and ad choices</Button>
+          )}
 
           <Button mode="contained" onPress={() => router.back()} style={styles.button}>
             Back to Home

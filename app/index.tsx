@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Button, Text, Card, useTheme } from 'react-native-paper';
+import { Button, Text, useTheme } from 'react-native-paper';
 import { ScreenContainer } from '@/src/ui/ScreenContainer';
 import { TopNav } from '@/src/ui/TopNav';
 import { logEvent } from '@/src/utils/logger';
@@ -68,18 +68,6 @@ export default function HomeScreen() {
               Settings
             </Button>
           </View>
-
-          {/* Advertising Placeholder */}
-          <Card style={styles.adCard} mode="outlined">
-            <Card.Content>
-              <Text
-                variant="bodyMedium"
-                style={[styles.adText, { color: theme.colors.onSurfaceVariant }]}
-              >
-                Advertising
-              </Text>
-            </Card.Content>
-          </Card>
         </View>
       </ScreenContainer>
     </>
@@ -111,12 +99,5 @@ const styles = StyleSheet.create({
   },
   buttonContent: {
     paddingVertical: 8,
-  },
-  adCard: {
-    width: '100%',
-    marginTop: 8,
-  },
-  adText: {
-    textAlign: 'center',
   },
 });
