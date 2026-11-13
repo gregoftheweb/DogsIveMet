@@ -1,16 +1,19 @@
 {
   "expo": {
-    "name": "DogsIveMet",
+    "name": "Dogs I've Met",
     "slug": "DogsIveMet",
-    "version": "0.5.0",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "dogsivemet",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/images/icon.png",
-      "supportsTablet": true,
-      "bundleIdentifier": "com.columbiafoundry.dogsivemet"
+      "supportsTablet": false,
+      "bundleIdentifier": "com.columbiafoundry.dogsivemet",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -39,8 +42,8 @@
       [
         "expo-speech-recognition",
         {
-          "microphonePermission": "DogsIveMet uses your microphone so you can dictate fields instead of typing.",
-          "speechRecognitionPermission": "DogsIveMet uses speech recognition to turn what you say into text for the field you're filling in."
+          "microphonePermission": "Dogs I've Met uses your microphone so you can dictate fields instead of typing.",
+          "speechRecognitionPermission": "Dogs I've Met uses speech recognition to turn what you say into text for the field you're filling in."
         }
       ],
       "expo-font",
