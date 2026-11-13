@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import type { TextInput as RNTextInput } from 'react-native';
 import { IconButton, TextInput } from 'react-native-paper';
 import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
 
@@ -46,7 +45,7 @@ export function VoiceInputField({
 }: VoiceInputFieldProps) {
   const [mode, setMode] = useState<Mode>('idle');
   const [interimTranscript, setInterimTranscript] = useState('');
-  const inputRef = useRef<RNTextInput>(null);
+  const inputRef = useRef<{ focus: () => void; blur: () => void } | null>(null);
 
   // Stop any in-progress recognition on unmount / screen navigation away.
   // Unconditional: stopping when nothing is listening is a harmless no-op.
@@ -136,7 +135,7 @@ export function VoiceInputField({
   return (
     <View style={styles.container}>
       <TextInput
-        ref={inputRef}
+        ref={inputRef as unknown as React.RefObject<never>}
         label={label}
         value={displayValue}
         onChangeText={onChangeText}
