@@ -7,7 +7,10 @@ import {
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Banner, startAds } from '@/src/ads/ads';
 import 'react-native-reanimated';
 import { PaperProvider } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -31,6 +34,13 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const [splashFinished, setSplashFinished] = useState(false);
+  const finishSplash = useCallback(() => setSplashFinished(true), []);
+
+  useEffect(() => {
+    if (splashFinished) void startAds();
+  }, [splashFinished]);
+
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
@@ -45,13 +55,14 @@ export default function RootLayout() {
     <ThemeProvider>
       <DogCountsProvider>
         {loaded ? <RootLayoutNav /> : null}
-        <AnimatedSplashOverlay />
+        <AnimatedSplashOverlay onFinished={finishSplash} />
       </DogCountsProvider>
     </ThemeProvider>
   );
 }
 
 function RootLayoutNav() {
+  const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const { activeTheme } = useThemeMode();
 
@@ -63,15 +74,26 @@ function RootLayoutNav() {
       }}
     >
       <NavigationThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="new-dog" options={{ headerShown: false }} />
-          <Stack.Screen name="dogs-list" options={{ headerShown: false }} />
-          <Stack.Screen name="dog-profile" options={{ headerShown: false }} />
-          <Stack.Screen name="my-dog" options={{ headerShown: false }} />
-          <Stack.Screen name="settings" options={{ headerShown: false }} />
-          <Stack.Screen name="my-dogs-list" options={{ headerShown: false }} />
-        </Stack>
+        <View style={{ flex: 1, backgroundColor: activeTheme.colors.background }}>
+          <View style={{ flex: 1 }}>
+            <Stack>
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+              <Stack.Screen name="new-dog" options={{ headerShown: false }} />
+              <Stack.Screen name="dogs-list" options={{ headerShown: false }} />
+              <Stack.Screen name="dog-profile" options={{ headerShown: false }} />
+              <Stack.Screen name="my-dog" options={{ headerShown: false }} />
+              <Stack.Screen name="settings" options={{ headerShown: false }} />
+              <Stack.Screen name="my-dogs-list" options={{ headerShown: false }} />
+            </Stack>
+          </View>
+          <View style={{ alignItems: 'center', paddingBottom: insets.bottom }}>
+            <View
+              style={{ width: 320, height: 50, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Banner />
+            </View>
+          </View>
+        </View>
       </NavigationThemeProvider>
     </PaperProvider>
   );

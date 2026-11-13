@@ -4,3 +4,5 @@ dist
 android
 ios
 pnpm-lock.yaml
+# Store artwork and generated creative metadata are maintained separately.
+store-creative/

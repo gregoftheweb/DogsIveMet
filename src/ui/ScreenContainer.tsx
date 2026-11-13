@@ -17,6 +17,7 @@ interface ScreenContainerProps {
 export function ScreenContainer({ children, scroll = false, style }: ScreenContainerProps) {
   const theme = useTheme();
 
+  // The shared ad footer owns the bottom safe area.
   const containerStyle = [styles.container, { backgroundColor: theme.colors.background }, style];
 
   // For scroll mode, don't use flex: 1 - let content grow naturally
@@ -27,11 +28,12 @@ export function ScreenContainer({ children, scroll = false, style }: ScreenConta
 
   if (scroll) {
     return (
-      <SafeAreaView style={containerStyle} edges={['left', 'right', 'bottom']}>
+      <SafeAreaView style={containerStyle} edges={['left', 'right']}>
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={contentStyle}
           keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets
         >
           {children}
         </ScrollView>
@@ -40,7 +42,7 @@ export function ScreenContainer({ children, scroll = false, style }: ScreenConta
   }
 
   return (
-    <SafeAreaView style={containerStyle} edges={['left', 'right', 'bottom']}>
+    <SafeAreaView style={containerStyle} edges={['left', 'right']}>
       <View style={contentStyle}>{children}</View>
     </SafeAreaView>
   );

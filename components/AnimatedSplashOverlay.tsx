@@ -26,7 +26,7 @@ const splashKeyframe = new Keyframe({
   },
 });
 
-export function AnimatedSplashOverlay() {
+export function AnimatedSplashOverlay({ onFinished }: { onFinished?: () => void }) {
   const [animate, setAnimate] = useState(false);
   const [visible, setVisible] = useState(true);
 
@@ -42,6 +42,7 @@ export function AnimatedSplashOverlay() {
         'worklet';
         if (finished) {
           scheduleOnRN(setVisible, false);
+          if (onFinished) scheduleOnRN(onFinished);
         }
       })}
       style={styles.splashOverlay}

@@ -6,16 +6,34 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "ADS_TEST": "1"
+      }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "ADS_TEST": "1"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "ADS_TEST": "0"
+      }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "ascAppId": "6817840000"
+      },
+      "android": {
+        "serviceAccountKeyPath": "/home/greg/.config/columbiafoundry/play-service-account.json",
+        "track": "production",
+        "releaseStatus": "draft"
+      }
+    }
   }
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, View, Text, Image, Alert, Platform, KeyboardAvoidingView } from 'react-native';
+import { StyleSheet, View, Text, Image, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useFocusEffect } from 'expo-router/react-navigation';
 import * as ImagePicker from 'expo-image-picker';
@@ -449,10 +449,7 @@ export default function NewDogScreen() {
     <>
       <TopNav />
       <ScreenContainer scroll={true}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.keyboardView}
-        >
+        <View>
           {/* Name Input */}
           <View style={styles.inputContainer}>
             <VoiceInputField
@@ -558,7 +555,7 @@ export default function NewDogScreen() {
               Cancel
             </Button>
           </View>
-        </KeyboardAvoidingView>
+        </View>
 
         {/* Breed Selection Dialog */}
         <Portal>
@@ -602,9 +599,6 @@ export default function NewDogScreen() {
 }
 
 const styles = StyleSheet.create({
-  keyboardView: {
-    // Removed flex: 1 to allow ScrollView to work properly
-  },
   inputContainer: {
     marginBottom: 16,
   },

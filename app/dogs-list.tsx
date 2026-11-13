@@ -339,7 +339,7 @@ export default function DogsListScreen() {
         {/* Controls */}
         <Surface style={[styles.controls, { backgroundColor: theme.colors.surface }]}>
           {/* Search Input */}
-          <View style={styles.searchFieldWrapper}>
+          <View>
             <VoiceInputField
               label="Search by name"
               value={searchQuery}
@@ -514,12 +514,6 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 12,
     gap: 12,
-  },
-  searchFieldWrapper: {
-    // VoiceInputField's mic button overlaps its own right edge by design;
-    // this reserves extra room so the button doesn't run past the screen
-    // edge inside this screen's narrower (16px) side padding.
-    paddingRight: 24,
   },
   filterRow: {
     flexDirection: 'row',
