@@ -4,12 +4,10 @@ App: **Dogs I've Met** · `com.columbiafoundry.dogsivemet` · ASC app id 6817840
 
 ## Name and subtitle
 
-
 | Field           | Copy                        | Count |
 | --------------- | --------------------------- | ----- |
 | Name \[30\]     | Dogs I've Met               | 13    |
 | Subtitle \[30\] | Remember every dog you meet | 27    |
-
 
 ## Promotional text \[170\]
 
@@ -37,7 +35,6 @@ Dogs I've Met is made by Columbia Foundry.
 
 ## Other fields
 
-
 | Field              | Value                                                                                                          |
 | ------------------ | -------------------------------------------------------------------------------------------------------------- |
 | Primary category   | Lifestyle                                                                                                      |
@@ -49,11 +46,9 @@ Dogs I've Met is made by Columbia Foundry.
 | Age rating         | everything None/No; expect 4+ (ads are limited to teen-rated content)                                          |
 | Price              | Free                                                                                                           |
 
-
 ## App Privacy answers (App Store Connect → App Privacy)
 
 Data collected: **yes**, only by the AdMob SDK. The app itself collects nothing (dogs, photos, notes, audio stay on the device; speech is transcribed by Apple's own service and is not "collected" by us).
-
 
 | Data type                           | Linked to user | Used for tracking | Purpose                 |
 | ----------------------------------- | -------------- | ----------------- | ----------------------- |
@@ -62,7 +57,6 @@ Data collected: **yes**, only by the AdMob SDK. The app itself collects nothing 
 | Usage Data → Product Interaction    | No             | **Yes**           | Third-party advertising |
 | Location → Coarse Location          | No             | **Yes**           | Third-party advertising |
 | Diagnostics → Other Diagnostic Data | No             | No                | Third-party advertising |
-
 
 Tracking: **yes** (the ATT prompt is in the app). Same as Madrona Gin Rummy and Clean Sweep.
 
@@ -80,4 +74,3 @@ Tracking: **yes** (the ATT prompt is in the app). Same as Madrona Gin Rummy and 
 4. EXTERNAL SERVICES All of the app's data (dogs, photos, notes) stays on the device; there is no server, account or analytics. Voice dictation uses Apple's speech recognition (SFSpeechRecognizer) only while the user is dictating. The one outside service is Google AdMob, which shows a banner ad at the bottom of the screen. Before ads start, the app shows Google's consent form where the law requires it and Apple's App Tracking Transparency prompt; if the user declines tracking, ads are still shown but are not personalised. Privacy policy: [https://columbiafoundry.com/privacy/dogs-ive-met.html](https://columbiafoundry.com/privacy/dogs-ive-met.html)
 5. REGIONAL DIFFERENCES None. The app works the same way, with the same content, in every region. It is in English.
 6. REGULATED INDUSTRY / THIRD-PARTY MATERIAL The app does not operate in a regulated industry and uses no third-party brands or licensed material. All artwork was made for Columbia Foundry LLC.
-
