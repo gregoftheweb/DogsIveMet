@@ -14,6 +14,12 @@ const DIDNT_CATCH_MESSAGE = "Didn't catch that — try again";
 const MIC_ICON_SIZE = 34;
 const MIC_BUTTON_PADDING = 8;
 const MIC_BUTTON_DIAMETER = MIC_ICON_SIZE + MIC_BUTTON_PADDING * 2;
+// Screens give fields 16px of side padding, less than the button's 25px
+// overhang, so the field itself steps in far enough to leave a 5px gap
+// between the button and the screen edge.
+const SCREEN_SIDE_PADDING = 16;
+const MIC_EDGE_GAP = 5;
+const FIELD_RIGHT_INSET = MIC_BUTTON_DIAMETER / 2 + MIC_EDGE_GAP - SCREEN_SIDE_PADDING;
 const MIC_BUTTON_COLOR = '#0B3D91';
 // "Mic is live" convention used by video-call apps (Zoom, Meet, Discord).
 const MIC_BUTTON_LISTENING_COLOR = '#00C853';
@@ -177,6 +183,7 @@ export function VoiceInputField({
 const styles = StyleSheet.create({
   container: {
     position: 'relative',
+    marginRight: FIELD_RIGHT_INSET,
   },
   micButton: {
     position: 'absolute',
