@@ -28,6 +28,11 @@
     "production": {
       "ios": {
         "ascAppId": "6817840000"
+      },
+      "android": {
+        "serviceAccountKeyPath": "/home/greg/.config/columbiafoundry/play-service-account.json",
+        "track": "production",
+        "releaseStatus": "draft"
       }
     }
   }
