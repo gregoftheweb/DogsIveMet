@@ -40,3 +40,6 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+store-creative/review-video/*.MP4
+store-creative/review-video/frames/
+store-creative/review-video/*.mp4
