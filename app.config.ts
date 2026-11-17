@@ -21,6 +21,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         skAdNetworkItems: ['cstr6suwn9.skadnetwork'],
       },
     ],
+    // Google Mobile Ads pins an old WorkManager whose Room R8 rules crash release builds; see the plugin.
+    './plugins/withAndroidxWorkConstraint',
   ],
   extra: { ...config.extra, adsTest: process.env.ADS_TEST === '1' },
 });
